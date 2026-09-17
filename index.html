@@ -81,6 +81,10 @@
             right: 15px;
         }
     </style>
+
+    <!-- Firebase SDK Compat Core & Realtime Database -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 </head>
 <body>
 
@@ -111,7 +115,7 @@
                 <div class="card h-100 shadow-sm border-0 p-3 p-md-4">
                     <i class="fa-solid fa-tv fa-3x text-success mb-3"></i>
                     <h3>Tela da TV (Saguão)</h3>
-                    <p class="text-muted small">Display público que exibe os chamados e reproduz o som da chamada.</p>
+                    <p class="text-muted small">Display público que exibe os chamados e reproduz o som da chamada em tempo real.</p>
                     <div class="mt-auto">
                         <button onclick="openTVView()" class="btn btn-success btn-lg w-100 py-3 fw-bold">
                             <i class="fa-solid fa-expand me-2"></i>ABRIR TELA DA TV
@@ -238,8 +242,25 @@
     </div>
 
     <script>
-        // App State
-        const channel = new BroadcastChannel('hosp_call_channel');
+        // ======================================================
+        // CONFIGURAÇÃO DO FIREBASE (SUBSTITUA PELAS SUAS CHAVES)
+        // ======================================================
+        const firebaseConfig = {
+            apiKey: "COLE_SUA_API_KEY_AQUI",
+            authDomain: "painel-chamada-a847a.firebaseapp.com",
+            databaseURL: "https://painel-chamada-a847a-default-rtdb.firebaseio.com",
+            projectId: "painel-chamada-a847a",
+            storageBucket: "painel-chamada-a847a.appspot.com",
+            messagingSenderId: "COLE_SEU_SENDER_ID_AQUI",
+            appId: "COLE_SEU_APP_ID_AQUI"
+        };
+
+        // Inicializa o Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        const callsRef = database.ref('calls');
+
+        // Estado da Aplicação
         let currentRoomId = 1;
         let callQueue = [];
         let isSpeaking = false;
@@ -284,11 +305,20 @@
             document.getElementById('screen-selector').classList.add('d-none');
             document.getElementById('screen-tv').classList.remove('d-none');
 
-            // Ativa o sintetizador de voz com toque prévio para contornar o bloqueio mobile
+            // Libera áudio no mobile/browser
             if ('speechSynthesis' in window) {
                 const unlockAudio = new SpeechSynthesisUtterance('');
                 window.speechSynthesis.speak(unlockAudio);
             }
+
+            // Escuta novas chamadas do Firebase em tempo real
+            callsRef.limitToLast(1).on('child_added', (snapshot) => {
+                const data = snapshot.val();
+                if(data) {
+                    callQueue.push(data);
+                    processQueue();
+                }
+            });
         }
 
         function backToSelector() {
@@ -320,10 +350,12 @@
                 doctorName,
                 isPreferential,
                 repeats,
-                timestamp: new Date().toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'})
+                timestamp: new Date().toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'}),
+                createdAt: firebase.database.ServerValue.TIMESTAMP
             };
 
-            channel.postMessage(payload);
+            // Envia o chamado para o banco do Firebase
+            callsRef.push(payload);
 
             document.getElementById('last-called-info').classList.remove('d-none');
             document.getElementById('last-patient-text').innerText = `${patientName} (${isPreferential ? 'Pref.' : 'Comum'})`;
@@ -338,11 +370,6 @@
                 callPatient();
             }
         }
-
-        channel.onmessage = (event) => {
-            callQueue.push(event.data);
-            processQueue();
-        };
 
         function processQueue() {
             updateQueueBadge();
