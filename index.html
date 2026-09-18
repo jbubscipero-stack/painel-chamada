@@ -97,7 +97,7 @@
                     <span class="text-[10px] uppercase font-extrabold text-slate-400 tracking-wider">Status da Sincronização em Tempo Real</span>
                     <h3 class="text-xs sm:text-sm font-bold text-emerald-400 flex items-center space-x-2" id="sync-status-text">
                         <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                        <span>Conectado via Realtime Database (Nativo)</span>
+                        <span>Conectado via Realtime Database (Fila Ativa)</span>
                     </h3>
                 </div>
             </div>
@@ -377,6 +377,10 @@
         let audioCtx = null;
         let lastProcessedCallId = null;
 
+        // Gerenciamento de Fila de Reprodução
+        let callQueue = [];
+        let isPlayingQueue = false;
+
         let rtdb = null;
         let broadcastChannel = null;
 
@@ -408,7 +412,7 @@
                 rtdb = getDatabase(app);
 
                 if (badge) {
-                    badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span><span>Conectado via Realtime Database (Nativo)</span>`;
+                    badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span><span>Conectado via Realtime Database (Fila Ativa)</span>`;
                 }
 
                 const callsRef = ref(rtdb, 'chamamed/calls');
@@ -425,7 +429,8 @@
 
                     if (calls.length > 0) {
                         const topCall = calls[0];
-                        if (topCall.id !== lastProcessedCallId) {
+                        // Se for uma chamada nova que veio da nuvem e ainda não está na fila/histórico recente
+                        if (topCall.id !== lastProcessedCallId && !callQueue.some(q => q.id === topCall.id)) {
                             handleIncomingCall(topCall);
                         }
                     }
@@ -446,14 +451,39 @@
         }
 
         function handleIncomingCall(call) {
-            lastProcessedCallId = call.id;
-            currentCall = call;
-            updateTVPanelUI(call);
+            // Evita duplicar exatamente o mesmo ID se já estiver sendo processado
+            if (call.id === lastProcessedCallId) return;
 
-            const isRecent = call.timestamp ? (Date.now() - call.timestamp) < 30000 : true;
-            if (isRecent) {
-                playCallSequence(call, call.repeats || 2);
+            // Insere na fila de espera
+            callQueue.push(call);
+
+            // Se o player estiver ocioso, dispara imediatamente
+            if (!isPlayingQueue) {
+                processNextInQueue();
             }
+        }
+
+        function processNextInQueue() {
+            if (callQueue.length === 0) {
+                isPlayingQueue = false;
+                return;
+            }
+
+            isPlayingQueue = true;
+            const nextCall = callQueue.shift();
+
+            lastProcessedCallId = nextCall.id;
+            currentCall = nextCall;
+
+            // Atualiza a interface visual da TV
+            updateTVPanelUI(nextCall);
+
+            // Toca a sequência de áudio e, ao terminar, aguarda 1s para o próximo da fila
+            playCallSequence(nextCall, nextCall.repeats || 2, () => {
+                setTimeout(() => {
+                    processNextInQueue();
+                }, 1000);
+            });
         }
 
         function loadStoredConfig() {
@@ -669,6 +699,25 @@
             }
         }
 
+        function playCallSequence(callData, remaining, onQueueFinished) {
+            if (remaining <= 0) {
+                if (typeof onQueueFinished === 'function') onQueueFinished();
+                return;
+            }
+
+            playChimeSound(() => {
+                speakPatientCall(callData, () => {
+                    if (remaining > 1) {
+                        setTimeout(() => {
+                            playCallSequence(callData, remaining - 1, onQueueFinished);
+                        }, 800);
+                    } else {
+                        if (typeof onQueueFinished === 'function') onQueueFinished();
+                    }
+                });
+            });
+        }
+
         function triggerCall(isRecall = false, patientOverride = null) {
             const inputField = document.getElementById('patient-name-input');
             const name = patientOverride || (inputField ? inputField.value.trim() : '');
@@ -684,7 +733,7 @@
             const repeatSelect = document.getElementById('repeat-count');
             const repeatCount = repeatSelect ? (parseInt(repeatSelect.value) || 1) : 2;
 
-            const callDocId = 'call-' + Date.now();
+            const callDocId = 'call-' + Date.now() + '-' + Math.floor(Math.random() * 1000);
             const docNameInput = document.getElementById('doc-name-input');
             const callData = {
                 id: callDocId,
@@ -698,9 +747,7 @@
                 time: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
             };
 
-            currentCall = callData;
-            lastProcessedCallId = callDocId;
-
+            // Envia para a nuvem em tempo real
             if (rtdb) {
                 try {
                     const callRef = ref(rtdb, 'chamamed/calls/' + callDocId);
@@ -714,13 +761,13 @@
                 } catch(e) {}
             }
 
-            if (!isRecall || !callHistory.some(c => c.id === callData.id)) {
+            if (!callHistory.some(c => c.id === callData.id)) {
                 callHistory.unshift(callData);
             }
-
             updateHistoryUI();
-            updateTVPanelUI(callData);
-            playCallSequence(callData, repeatCount);
+
+            // Adiciona na fila local de áudio/TV
+            handleIncomingCall(callData);
 
             if (!isRecall && inputField) {
                 inputField.value = '';
@@ -728,22 +775,10 @@
         }
 
         function triggerRecall() {
-            if (!currentCall) return;
-            triggerCall(true, currentCall.patientName);
-        }
-
-        function playCallSequence(callData, remaining) {
-            if (remaining <= 0) return;
-
-            playChimeSound(() => {
-                speakPatientCall(callData, () => {
-                    if (remaining > 1) {
-                        setTimeout(() => {
-                            playCallSequence(callData, remaining - 1);
-                        }, 1000);
-                    }
-                });
-            });
+            if (!currentCall && callHistory.length === 0) return;
+            const targetToRecall = currentCall || callHistory[0];
+            // O rechamar agora entra na fila de chamadas normalmente
+            triggerCall(true, targetToRecall.patientName);
         }
 
         function updateTVPanelUI(call) {
