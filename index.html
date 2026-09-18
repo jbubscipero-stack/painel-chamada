@@ -1,24 +1,20 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ChamaMed PRO - Sistema de Chamada Hospitalar e UBS</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Font Awesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <script>
         tailwind.config = {
+            darkMode: 'class',
             theme: {
                 extend: {
-                    fontFamily: { sans: ['Inter', 'sans-serif'] },
                     colors: {
-                        darkbg: '#0b1329',
-                        darkcard: '#131e3a',
-                        darkcardborder: '#1e2d52',
+                        darkbg: '#0b0f19',
+                        darkcard: '#151c2c',
+                        darkcardborder: '#232d42',
                         brandblue: '#0284c7',
                         brandaccent: '#38bdf8'
                     }
@@ -26,336 +22,327 @@
             }
         }
     </script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom CSS Animations -->
     <style>
-        body { background-color: #0b1329; color: #f8fafc; font-family: 'Inter', sans-serif; overflow-x: hidden; }
-        .glow-effect { box-shadow: 0 0 25px rgba(56, 189, 248, 0.25); }
-        .blink-call { animation: pulseGlow 1.2s infinite alternate; }
-        @keyframes pulseGlow {
-            0% { border-color: #38bdf8; box-shadow: 0 0 15px rgba(56, 189, 248, 0.4); }
-            100% { border-color: #ef4444; box-shadow: 0 0 35px rgba(239, 68, 68, 0.8); }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0b0f19;
+            color: #f8fafc;
         }
-        /* Custom scrollbar */
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: #0b1329; }
-        ::-webkit-scrollbar-thumb { background: #1e2d52; border-radius: 4px; }
+        .blink-call {
+            animation: pulseGlow 1.2s infinite alternate;
+        }
+        @keyframes pulseGlow {
+            0% {
+                border-color: #0284c7;
+                box-shadow: 0 0 15px rgba(2, 132, 199, 0.4);
+            }
+            100% {
+                border-color: #38bdf8;
+                box-shadow: 0 0 35px rgba(56, 189, 248, 0.8);
+            }
+        }
     </style>
 </head>
-<body class="min-h-screen flex flex-col justify-between">
+<body class="bg-darkbg text-slate-100 min-h-screen flex flex-col justify-between selection:bg-sky-500 selection:text-white">
 
-    <!-- HEADER NAVBAR -->
-    <header class="bg-darkcard border-b border-darkcardborder px-4 py-3 sticky top-0 z-40 shadow-lg">
+    <header class="bg-darkcard border-b border-darkcardborder p-4 sticky top-0 z-40 shadow-lg">
         <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
             
-            <!-- Logotipo e Título -->
+            <!-- LOGO DA APLICAÇÃO -->
             <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-sky-600 to-cyan-400 flex items-center justify-center text-white shadow-md">
-                    <i class="fa-solid fa-hospital text-xl"></i>
+                <div class="p-2.5 bg-gradient-to-tr from-sky-600 to-indigo-600 text-white rounded-2xl shadow-lg shadow-sky-500/20">
+                    <i class="fa-solid fa-hospital-user text-2xl"></i>
                 </div>
                 <div>
-                    <div class="flex items-center space-x-2">
-                        <h1 class="font-extrabold text-lg text-white tracking-wide">ChamaMed</h1>
-                        <span class="bg-sky-500/20 text-sky-400 text-xs font-bold px-2 py-0.5 rounded border border-sky-500/30">PRO</span>
-                    </div>
-                    <p class="text-xs text-slate-400">Prefeitura & Health Care System</p>
+                    <h1 class="text-xl font-black tracking-tight text-white flex items-center gap-2">
+                        <span>ChamaMed</span>
+                        <span class="text-xs px-2 py-0.5 rounded-full bg-sky-500/20 text-sky-400 border border-sky-500/30 font-bold uppercase tracking-widest">PRO</span>
+                    </h1>
+                    <p class="text-xs text-slate-400 font-medium">Prefeitura & Health Care System</p>
                 </div>
             </div>
 
-            <!-- Navegação de Telas -->
-            <div class="flex items-center bg-slate-900/80 p-1 rounded-xl border border-slate-800">
-                <button id="btn-view-doctor" onclick="switchView('doctor')" class="px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-200 bg-sky-600 text-white shadow-md flex items-center space-x-2">
-                    <i class="fa-solid fa-user-doctor"></i>
+            <!-- NAVEGAÇÃO DE PAINÉIS -->
+            <div class="flex items-center bg-slate-900/80 p-1.5 rounded-2xl border border-darkcardborder shadow-inner">
+                <button id="btn-view-doctor" onclick="switchView('doctor')" class="px-4 py-2 rounded-xl font-semibold text-xs sm:text-sm transition-all duration-200 bg-sky-600 text-white shadow-md flex items-center space-x-2">
+                    <i class="fa-solid fa-[#fa-user-md] fa-user-doctor"></i>
                     <span>Painel do Profissional</span>
                 </button>
-                <button id="btn-view-tv" onclick="switchView('tv')" class="px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-200 text-slate-400 hover:text-white flex items-center space-x-2">
-                    <i class="fa-solid fa-desktop"></i>
+                <button id="btn-view-tv" onclick="switchView('tv')" class="px-4 py-2 rounded-xl font-semibold text-xs sm:text-sm transition-all duration-200 text-slate-400 hover:text-white flex items-center space-x-2">
+                    <i class="fa-solid fa-tv"></i>
                     <span>Painel TV Chamadas</span>
                 </button>
             </div>
 
-            <!-- Botões Rápidos e Data/Hora -->
-            <div class="flex items-center space-x-3">
-                <div id="live-clock" class="text-right hidden sm:block">
-                    <div class="text-lg font-bold font-mono text-sky-400 leading-none" id="clock-time">00:00:00</div>
-                    <div class="text-xs text-slate-400 mt-1" id="clock-date">--/--/----</div>
+            <!-- CONTROLES & RELÓGIO -->
+            <div class="flex items-center space-x-4">
+                <div class="hidden sm:block text-right">
+                    <div class="text-base font-extrabold text-slate-100 tracking-wider" id="clock-time">00:00:00</div>
+                    <div class="text-xs font-medium text-slate-400" id="clock-date">--/--/----</div>
                 </div>
-                <button onclick="openSettingsModal()" class="p-2.5 bg-darkcardborder/60 hover:bg-darkcardborder text-slate-200 rounded-xl transition border border-slate-700/50 flex items-center space-x-2 text-sm font-semibold">
-                    <i class="fa-solid fa-gear text-sky-400"></i>
+                <button onclick="openSettingsModal()" class="p-3 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-2xl border border-slate-700 transition shadow-sm flex items-center space-x-2 text-xs font-bold" title="Configurações e Salas">
+                    <i class="fa-solid fa-gear text-sm"></i>
                     <span class="hidden md:inline">Ajustes</span>
                 </button>
             </div>
-
         </div>
     </header>
 
-    <!-- MAIN CONTENT CONTAINERS -->
-    <main class="flex-grow max-w-7xl w-full mx-auto p-4 md:p-6 space-y-6">
+    <main class="max-w-7xl mx-auto w-full p-4 sm:p-6 flex-grow">
 
-        <!-- STATUS TOP BAR (PROFISSIONAL + SALA ATIVA) -->
-        <div id="status-bar" class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            
-            <!-- PROFISSIONAL / ATENDIMENTO -->
-            <div class="bg-darkcard border border-darkcardborder rounded-2xl p-4 flex items-center space-x-4 shadow-sm">
-                <div class="p-3 bg-sky-500/10 text-sky-400 rounded-xl border border-sky-500/20 text-xl">
-                    <i class="fa-solid fa-id-card"></i>
-                </div>
-                <div class="flex-grow min-w-0">
-                    <span class="text-xs uppercase font-bold text-slate-400 tracking-wider">Profissional / Atendimento</span>
-                    <input type="text" id="doc-name-input" onchange="saveDoctorSettings()" class="bg-slate-900/90 text-white font-bold text-sm w-full focus:outline-none border border-slate-700 rounded-lg px-2.5 py-1 mt-1 truncate focus:border-sky-500 transition" placeholder="Ex: Dr. Jonathan Santos - Clínica Geral">
-                </div>
-            </div>
-
-            <!-- LOCAL / SALA SELECTOR -->
-            <div class="bg-darkcard border border-darkcardborder rounded-2xl p-4 flex items-center space-x-4 shadow-sm">
-                <div class="p-3 bg-emerald-500/10 text-emerald-400 rounded-xl border border-emerald-500/20 text-xl">
-                    <i class="fa-solid fa-door-open"></i>
-                </div>
-                <div class="flex-grow min-w-0">
-                    <span class="text-xs uppercase font-bold text-slate-400 tracking-wider">Local / Sala</span>
-                    <select id="doc-room-select" onchange="onRoomSelectChange()" class="bg-slate-900 text-white font-bold text-sm w-full focus:outline-none border border-slate-700 rounded-lg px-2.5 py-1 mt-1 truncate focus:border-emerald-500 transition cursor-pointer">
-                        <!-- Opções dinâmicas das salas -->
-                    </select>
-                    <p class="text-xs text-emerald-400 font-medium mt-1">● Ativo e Pronto</p>
-                </div>
-            </div>
-
-            <!-- MODO DE OPERAÇÃO -->
-            <div class="bg-darkcard border border-darkcardborder rounded-2xl p-4 flex items-center space-x-4 shadow-sm">
-                <div class="p-3 bg-indigo-500/10 text-indigo-400 rounded-xl border border-indigo-500/20 text-xl">
+        <!-- STATUS DA SINCRONIZAÇÃO AUTOMÁTICA -->
+        <div class="mb-6 bg-darkcard border border-darkcardborder rounded-2xl p-4 flex items-center justify-between shadow-sm flex-wrap gap-3">
+            <div class="flex items-center space-x-3">
+                <div class="p-2.5 bg-emerald-500/10 text-emerald-400 rounded-xl border border-emerald-500/20 text-lg">
                     <i class="fa-solid fa-wifi"></i>
                 </div>
                 <div>
-                    <span class="text-xs uppercase font-bold text-slate-400 tracking-wider">Modo de Operação</span>
-                    <h3 class="text-sm font-bold text-indigo-400 mt-0.5">Sincronização Local / Multi-Sessão</h3>
-                    <p class="text-xs text-slate-400">Avisos e áudio integrados</p>
+                    <span class="text-[10px] uppercase font-extrabold text-slate-400 tracking-wider">Status do Sistema</span>
+                    <h3 class="text-xs sm:text-sm font-bold text-emerald-400 flex items-center space-x-2" id="sync-status-text">
+                        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                        <span>Sincronização Automática Ativa</span>
+                    </h3>
+                </div>
+            </div>
+            <span class="text-xs text-slate-400 bg-slate-900 px-3 py-1.5 rounded-xl border border-slate-800">Pronto para Celular, Computador ou TV</span>
+        </div>
+
+        <!-- VIEW 1: PAINEL DO PROFISSIONAL -->
+        <div id="view-doctor-panel" class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            
+            <!-- FORMULÁRIO DE CHAMADA DO PACIENTE -->
+            <div class="lg:col-span-7 space-y-6">
+                
+                <!-- SELEÇÃO DE SALA E MÉDICO -->
+                <div class="bg-darkcard border border-darkcardborder rounded-3xl p-6 shadow-xl space-y-4">
+                    <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                        <h3 class="font-bold text-white text-base flex items-center space-x-2">
+                            <i class="fa-solid fa-door-open text-sky-400"></i>
+                            <span>Consultório e Atendimento</span>
+                        </h3>
+                        <span class="text-xs text-slate-400">Selecione seu local de trabalho</span>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Sala / Consultório</label>
+                            <select id="doc-room-select" onchange="onRoomSelectChange()" class="w-full bg-slate-900 border border-slate-700 text-white font-bold text-sm rounded-2xl p-3 focus:outline-none focus:border-sky-500 transition">
+                                <!-- Opções inseridas via JS -->
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Profissional / Procedimento</label>
+                            <input type="text" id="doc-name-input" onchange="saveDoctorSettings()" placeholder="Ex: Dr. Jonathan Santos - Clínica Geral" class="w-full bg-slate-900 border border-slate-700 text-white font-semibold text-sm rounded-2xl p-3 focus:outline-none focus:border-sky-500 transition">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CAMPO NOME DO PACIENTE E BOTOES -->
+                <div class="bg-darkcard border border-darkcardborder rounded-3xl p-6 shadow-xl space-y-5">
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-sky-400 mb-2">Nome do Paciente para Chamada</label>
+                        <div class="relative">
+                            <input type="text" id="patient-name-input" placeholder="Digite o nome completo do paciente..." class="w-full bg-slate-900 border-2 border-slate-700 text-white text-lg font-bold rounded-2xl px-4 py-4 pr-12 focus:outline-none focus:border-sky-500 transition placeholder:text-slate-600 placeholder:font-normal">
+                            <button onclick="document.getElementById('patient-name-input').value=''" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300">
+                                <i class="fa-solid fa-xmark text-lg"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-between flex-wrap gap-4 bg-slate-900/60 p-4 rounded-2xl border border-slate-800">
+                        <label class="flex items-center space-x-3 cursor-pointer select-none">
+                            <input type="checkbox" id="preferential-check" class="w-5 h-5 rounded text-sky-600 focus:ring-sky-500 border-slate-700 bg-slate-800">
+                            <span class="text-sm font-bold text-amber-400 flex items-center space-x-1.5">
+                                <i class="fa-solid fa-wheelchair"></i>
+                                <span>Atendimento Preferencial</span>
+                            </span>
+                        </label>
+
+                        <div class="flex items-center space-x-2">
+                            <span class="text-xs font-bold text-slate-400">Repetir áudio:</span>
+                            <select id="repeat-count" class="bg-slate-800 border border-slate-700 text-white font-bold text-xs rounded-xl p-2 focus:outline-none">
+                                <option value="1">1 vez</option>
+                                <option value="2" selected>2 vezes</option>
+                                <option value="3">3 vezes</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- BOTOES DE AÇÃO -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                        <button onclick="triggerCall(false)" class="w-full py-4 px-6 bg-gradient-to-r from-sky-600 to-blue-600 hover:from-sky-500 hover:to-blue-500 text-white font-extrabold text-base rounded-2xl shadow-lg shadow-sky-600/30 active:scale-95 transition flex items-center justify-center space-x-3">
+                            <i class="fa-solid fa-bullhorn text-xl"></i>
+                            <span>CHAMAR PACIENTE</span>
+                        </button>
+
+                        <button onclick="triggerRecall()" class="w-full py-4 px-6 bg-amber-600/20 hover:bg-amber-600/30 text-amber-400 border border-amber-500/40 font-extrabold text-base rounded-2xl active:scale-95 transition flex items-center justify-center space-x-3">
+                            <i class="fa-solid fa-rotate-right text-xl"></i>
+                            <span>RECHAMAR ATUAL</span>
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- HISTÓRICO DE CHAMADAS NESTA SALA -->
+            <div class="lg:col-span-5">
+                <div class="bg-darkcard border border-darkcardborder rounded-3xl p-6 shadow-xl h-full flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between border-b border-slate-800 pb-3 mb-4">
+                            <h3 class="font-bold text-white text-base flex items-center space-x-2">
+                                <i class="fa-solid fa-clock-rotate-left text-sky-400"></i>
+                                <span>Histórico desta Sala</span>
+                            </h3>
+                            <button onclick="clearCurrentRoomHistory()" class="text-xs text-slate-500 hover:text-red-400 font-semibold transition">
+                                Limpar
+                            </button>
+                        </div>
+
+                        <div id="doc-history-list" class="space-y-3 max-h-[420px] overflow-y-auto pr-1">
+                            <!-- Renderizado via JS -->
+                        </div>
+                    </div>
                 </div>
             </div>
 
         </div>
 
-        <!-- VIEW 1: PAINEL DO PROFISSIONAL -->
-        <section id="view-doctor-panel" class="space-y-6">
+        <!-- VIEW 2: PAINEL TV CHAMADAS (OCULTO POR PADRÃO) -->
+        <div id="view-tv-panel" class="hidden space-y-6">
             
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                
-                <!-- EMISSÃO DE CHAMADA DE PACIENTE -->
-                <div class="lg:col-span-7 bg-darkcard border border-darkcardborder rounded-3xl p-6 shadow-xl relative overflow-hidden flex flex-col justify-between">
-                    <div>
-                        <div class="flex items-center justify-between pb-4 mb-4 border-b border-slate-800">
-                            <h2 class="text-xl font-extrabold text-white flex items-center space-x-2">
-                                <i class="fa-solid fa-bullhorn text-sky-400"></i>
-                                <span>Chamar Novo Paciente</span>
-                            </h2>
-                            <span class="text-xs bg-sky-500/10 text-sky-400 px-3 py-1 rounded-full font-bold border border-sky-500/20">Chamada por Voz Ativa</span>
-                        </div>
-
-                        <!-- Formulário de Nome do Paciente -->
-                        <div class="space-y-4">
-                            <div>
-                                <label class="block text-sm font-bold text-slate-300 mb-2">Nome Completo do Paciente:</label>
-                                <div class="relative">
-                                    <input type="text" id="patient-name-input" placeholder="Digite ou selecione o nome do paciente..." autocomplete="off" class="w-full bg-slate-900 border-2 border-slate-700 focus:border-sky-500 text-white font-bold text-lg rounded-2xl px-4 py-3.5 pl-11 focus:outline-none transition placeholder-slate-500">
-                                    <i class="fa-solid fa-user text-slate-500 absolute left-4 top-1/2 -translate-y-1/2 text-lg"></i>
-                                </div>
-                            </div>
-
-                            <!-- Opções de Chamada -->
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
-                                <!-- Preferencial Toggle -->
-                                <label class="flex items-center space-x-3 bg-slate-900/60 p-3.5 rounded-2xl border border-slate-800 cursor-pointer hover:border-amber-500/50 transition">
-                                    <input type="checkbox" id="preferential-check" class="w-5 h-5 rounded text-amber-500 focus:ring-amber-500 focus:ring-offset-slate-900 bg-slate-800 border-slate-700">
-                                    <div>
-                                        <span class="font-bold text-sm text-amber-400 flex items-center space-x-1.5">
-                                            <i class="fa-solid fa-wheelchair"></i>
-                                            <span>Atendimento Preferencial</span>
-                                        </span>
-                                        <p class="text-xs text-slate-400">Anuncia Prioridade na TV</p>
-                                    </div>
-                                </label>
-
-                                <!-- Quantidade de Repetições -->
-                                <div class="bg-slate-900/60 p-3.5 rounded-2xl border border-slate-800 flex items-center justify-between">
-                                    <div>
-                                        <span class="font-bold text-sm text-slate-300">Repetições</span>
-                                        <p class="text-xs text-slate-400">Voz e Alerta Sonoro</p>
-                                    </div>
-                                    <select id="repeat-count" class="bg-slate-800 text-white font-bold text-sm rounded-xl px-3 py-1.5 border border-slate-700 focus:outline-none">
-                                        <option value="1">1 Vez</option>
-                                        <option value="2" selected>2 Vezes</option>
-                                        <option value="3">3 Vezes</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Botões de Ação de Chamada -->
-                    <div class="pt-6 mt-6 border-t border-slate-800 grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <button onclick="triggerCall(false)" class="bg-gradient-to-r from-sky-600 to-sky-500 hover:from-sky-500 hover:to-sky-400 text-white font-extrabold text-base py-4 px-6 rounded-2xl shadow-lg shadow-sky-600/30 flex items-center justify-center space-x-3 transition active:scale-[0.98]">
-                            <i class="fa-solid fa-volume-high text-xl"></i>
-                            <span>CHAMAR PACIENTE</span>
-                        </button>
-
-                        <button onclick="triggerRecall()" class="bg-slate-800 hover:bg-slate-700 text-amber-400 border border-amber-500/30 font-bold text-base py-4 px-6 rounded-2xl flex items-center justify-center space-x-2 transition active:scale-[0.98]">
-                            <i class="fa-solid fa-rotate-right"></i>
-                            <span>RECHAMAR ÚLTIMO</span>
-                        </button>
-                    </div>
-
-                </div>
-
-                <!-- HISTÓRICO RECENTE DO CONSULTÓRIO -->
-                <div class="lg:col-span-5 bg-darkcard border border-darkcardborder rounded-3xl p-6 shadow-xl flex flex-col justify-between">
-                    <div>
-                        <div class="flex items-center justify-between pb-4 mb-4 border-b border-slate-800">
-                            <h3 class="text-lg font-bold text-white flex items-center space-x-2">
-                                <i class="fa-solid fa-clock-rotate-left text-emerald-400"></i>
-                                <span>Histórico desta Sala</span>
-                            </h3>
-                            <button onclick="clearCurrentRoomHistory()" class="text-xs text-slate-400 hover:text-red-400 transition">Limpar</button>
-                        </div>
-
-                        <div id="doc-history-list" class="space-y-3 max-h-[320px] overflow-y-auto pr-1">
-                            <!-- Inserido dinamicamente via JS -->
-                            <div class="text-center text-slate-500 py-10 text-sm">Nenhum paciente chamado nesta sala ainda.</div>
-                        </div>
-                    </div>
-
-                    <div class="pt-4 border-t border-slate-800 text-xs text-slate-400 text-center">
-                        Toque no paciente do histórico para rechamar rapidamente.
-                    </div>
-                </div>
-
+            <!-- BANNER DE DESTRAVAMENTO DE ÁUDIO PARA TV/CELULAR -->
+            <div id="tv-audio-unlock-banner" class="bg-sky-600/20 border border-sky-500/40 p-4 rounded-3xl flex items-center justify-between text-sky-200 text-xs sm:text-sm font-bold">
+                <span class="flex items-center space-x-2">
+                    <i class="fa-solid fa-volume-high text-sky-400 text-lg"></i>
+                    <span>Clique para habilitar a emissão de som e voz da TV neste navegador</span>
+                </span>
+                <button onclick="enableTVAudio()" class="bg-sky-500 hover:bg-sky-400 text-white px-4 py-2 rounded-2xl shadow font-extrabold text-xs uppercase tracking-wider transition">
+                    Ativar Som da TV
+                </button>
             </div>
 
-        </section>
-
-        <!-- VIEW 2: PAINEL DA TV DE CHAMADAS -->
-        <section id="view-tv-panel" class="hidden space-y-6">
-            
-            <!-- CARD DE CHAMADA EM DESTAQUE (TV) -->
-            <div id="tv-main-card" class="bg-gradient-to-b from-darkcard to-slate-900 border-2 border-darkcardborder rounded-3xl p-8 text-center shadow-2xl relative overflow-hidden transition-all duration-300">
-                
-                <div class="absolute top-4 right-6 flex items-center space-x-2">
-                    <span id="tv-badge-status" class="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-xs px-3 py-1 rounded-full font-bold uppercase tracking-wider">Aguardando Chamada</span>
+            <!-- CARD PRINCIPAL DE CHAMADA DA TV -->
+            <div id="tv-main-card" class="bg-darkcard border-2 border-darkcardborder rounded-[32px] p-6 sm:p-10 shadow-2xl transition-all duration-300">
+                <div class="flex items-center justify-between mb-6 border-b border-slate-800 pb-4">
+                    <span id="tv-badge-status" class="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-xs sm:text-sm px-4 py-1.5 rounded-full font-extrabold uppercase tracking-widest">
+                        CHAMADA ATIVA
+                    </span>
+                    <span class="text-xs sm:text-sm text-slate-400 font-bold flex items-center space-x-2">
+                        <i class="fa-solid fa-hospital text-sky-400"></i>
+                        <span>Atendimento SUS / UBS</span>
+                    </span>
                 </div>
 
-                <p class="text-xs sm:text-sm font-extrabold uppercase text-sky-400 tracking-widest mb-2">PACIENTE CHAMADO</p>
-                
-                <!-- NOME DO PACIENTE EM DESTAQUE -->
-                <h2 id="tv-patient-name" class="text-3xl sm:text-5xl md:text-6xl font-black text-white tracking-tight my-4 drop-shadow-md">
-                    -- AGUARDANDO --
-                </h2>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-3xl mx-auto mt-6 pt-6 border-t border-slate-800">
-                    <!-- SALA / CONSULTÓRIO -->
-                    <div class="bg-slate-900/80 p-4 rounded-2xl border border-slate-800">
-                        <span class="text-xs uppercase font-extrabold text-slate-400 tracking-wider">LOCAL DE ATENDIMENTO</span>
-                        <h3 id="tv-room-name" class="text-2xl sm:text-3xl font-black text-emerald-400 mt-1">--</h3>
-                    </div>
-
-                    <!-- MÉDICO / PROCEDIMENTO -->
-                    <div class="bg-slate-900/80 p-4 rounded-2xl border border-slate-800">
-                        <span class="text-xs uppercase font-extrabold text-slate-400 tracking-wider">MÉDICO / PROCEDIMENTO</span>
-                        <h3 id="tv-doctor-name" class="text-xl sm:text-2xl font-extrabold text-sky-300 mt-1 truncate">--</h3>
-                    </div>
+                <div class="text-center py-6 sm:py-10 space-y-4">
+                    <span class="text-xs sm:text-sm font-black uppercase tracking-[0.3em] text-slate-400">PACIENTE CHAMADO</span>
+                    <h2 id="tv-patient-name" class="text-4xl sm:text-6xl md:text-7xl font-black text-white tracking-tight leading-tight drop-shadow-md">
+                        Aguardando Chamada...
+                    </h2>
                 </div>
 
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6 pt-6 border-t border-slate-800">
+                    <div class="bg-slate-900/90 p-5 rounded-2xl border border-slate-800 text-center">
+                        <span class="text-[10px] uppercase font-black text-slate-400 tracking-wider">LOCAL / SALA</span>
+                        <p id="tv-room-name" class="text-2xl sm:text-3xl font-black text-sky-400 mt-1">
+                            --
+                        </p>
+                    </div>
+                    <div class="bg-slate-900/90 p-5 rounded-2xl border border-slate-800 text-center">
+                        <span class="text-[10px] uppercase font-black text-slate-400 tracking-wider">MÉDICO / PROCEDIMENTO</span>
+                        <p id="tv-doctor-name" class="text-xl sm:text-2xl font-black text-slate-100 mt-1">
+                            --
+                        </p>
+                    </div>
+                </div>
             </div>
 
-            <!-- HISTÓRICO DE ÚLTIMAS CHAMADAS DA TV -->
-            <div class="bg-darkcard border border-darkcardborder rounded-3xl p-6 shadow-xl">
-                <h3 class="text-base font-extrabold text-slate-300 mb-4 uppercase tracking-wider flex items-center space-x-2">
+            <!-- ÚLTIMOS PACIENTES CHAMADOS NA TV -->
+            <div class="space-y-3">
+                <h3 class="text-sm font-extrabold uppercase tracking-wider text-slate-400 flex items-center space-x-2">
                     <i class="fa-solid fa-list-ol text-sky-400"></i>
-                    <span>Últimas Chamadas Painel Geral</span>
+                    <span>Últimas Chamadas</span>
                 </h3>
-
                 <div id="tv-history-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-                    <!-- Cards dinâmicos inseridos via JS -->
-                    <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 text-center text-slate-500 text-sm">Aguardando...</div>
-                    <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 text-center text-slate-500 text-sm">Aguardando...</div>
-                    <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 text-center text-slate-500 text-sm">Aguardando...</div>
-                    <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 text-center text-slate-500 text-sm">Aguardando...</div>
+                    <!-- Cards de histórico de TV inseridos via JS -->
                 </div>
             </div>
 
-        </section>
+        </div>
 
     </main>
 
-    <!-- MODAL DE CONFIGURAÇÕES & GERENCIAMENTO DE SALAS -->
-    <div id="settings-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-        <div class="bg-darkcard border border-darkcardborder w-full max-w-2xl rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+    <!-- MODAL DE CONFIGURAÇÕES E SALAS -->
+    <div id="settings-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-darkcard border border-darkcardborder rounded-3xl max-w-2xl w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
             
-            <!-- Modal Header -->
-            <div class="p-5 bg-slate-900 border-b border-slate-800 flex items-center justify-between">
-                <div class="flex items-center space-x-3">
-                    <i class="fa-solid fa-sliders text-sky-400 text-xl"></i>
-                    <h3 class="font-extrabold text-lg text-white">Configurações do ChamaMed PRO</h3>
+            <div class="p-5 border-b border-slate-800 flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                    <i class="fa-solid fa-sliders text-sky-400 text-lg"></i>
+                    <h3 class="font-bold text-white text-base">Ajustes do Sistema e Salas</h3>
                 </div>
                 <button onclick="closeSettingsModal()" class="text-slate-400 hover:text-white text-xl">
                     <i class="fa-solid fa-xmark"></i>
                 </button>
             </div>
 
-            <!-- Tabs de Configuração -->
             <div class="p-6 overflow-y-auto space-y-6 flex-grow">
                 
-                <!-- GERENCIAMENTO DE SALAS -->
+                <!-- GERENCIADOR DE SALAS -->
                 <div>
                     <div class="flex items-center justify-between mb-3">
                         <div>
-                            <h4 class="text-base font-bold text-white">Gerenciar Consultórios e Salas</h4>
-                            <p class="text-xs text-slate-400">Cadastre ou edite as salas do seu hospital/UBS (Mínimo de 15 padrão)</p>
+                            <h4 class="font-bold text-white text-sm">Salas e Consultórios</h4>
+                            <p class="text-xs text-slate-400">Edite os nomes das salas e médicos ou adicione novas salas</p>
                         </div>
-                        <button onclick="addNewRoomPrompt()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs px-3.5 py-2 rounded-xl transition flex items-center space-x-1.5 shadow-md">
+                        <button onclick="addNewRoomPrompt()" class="bg-sky-600/20 hover:bg-sky-600/30 text-sky-400 border border-sky-500/30 font-bold text-xs px-3 py-1.5 rounded-xl transition flex items-center space-x-1">
                             <i class="fa-solid fa-plus"></i>
                             <span>Nova Sala</span>
                         </button>
                     </div>
-
-                    <!-- Lista Editável de Salas -->
-                    <div id="rooms-editor-list" class="space-y-2 max-h-[260px] overflow-y-auto pr-1">
-                        <!-- Gerado Dinamicamente -->
+                    
+                    <div id="rooms-editor-list" class="space-y-2 max-h-60 overflow-y-auto pr-1">
+                        <!-- Lista de salas em edição -->
                     </div>
                 </div>
 
-                <!-- CONFIGURAÇÃO DE SÍNTESE DE VOZ E ÁUDIO -->
-                <div class="pt-4 border-t border-slate-800 space-y-4">
-                    <h4 class="text-base font-bold text-white">Voz e Sinal Sonoro</h4>
+                <!-- CONFIGURAÇÕES DE ÁUDIO -->
+                <div class="border-t border-slate-800 pt-5 space-y-4">
+                    <h4 class="font-bold text-white text-sm">Configuração de Áudio e Voz</h4>
                     
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-xs font-bold text-slate-300 mb-1">Velocidade da Voz:</label>
-                            <input type="range" id="speech-rate" min="0.7" max="1.3" step="0.05" value="0.95" onchange="saveAudioSettings()" class="w-full accent-sky-500">
+                            <label class="block text-xs font-bold text-slate-400 mb-1">Som de Campainha</label>
+                            <select id="chime-type-select" onchange="saveAudioSettings()" class="w-full bg-slate-900 border border-slate-700 text-white font-bold text-xs rounded-xl p-2.5 focus:outline-none">
+                                <option value="hospital">Hospitalar (Três Tons)</option>
+                                <option value="modern">Moderno (Dois Tons)</option>
+                                <option value="simple">Simples (Bip)</option>
+                            </select>
                         </div>
 
                         <div>
-                            <label class="block text-xs font-bold text-slate-300 mb-1">Tom do Sinal Sonoro (Chime):</label>
-                            <select id="chime-type-select" onchange="saveAudioSettings()" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-sm text-white focus:outline-none">
-                                <option value="hospital">Sino Hospitalar Tridimencional</option>
-                                <option value="modern">Gongo Duplo Suave</option>
-                                <option value="digital">Bip Eletrônico Clínico</option>
-                            </select>
+                            <label class="block text-xs font-bold text-slate-400 mb-1">Velocidade da Voz</label>
+                            <input type="range" id="speech-rate" min="0.7" max="1.2" step="0.05" onchange="saveAudioSettings()" class="w-full accent-sky-500">
                         </div>
                     </div>
 
-                    <div class="flex space-x-2 pt-2">
-                        <button onclick="testCurrentChime()" class="bg-slate-800 hover:bg-slate-700 text-sky-400 border border-sky-500/30 text-xs font-bold px-3 py-2 rounded-xl flex items-center space-x-1">
-                            <i class="fa-solid fa-bell"></i>
-                            <span>Testar Som</span>
+                    <div class="flex items-center space-x-3 pt-2">
+                        <button onclick="testCurrentChime()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-3 py-2 rounded-xl text-xs font-bold transition">
+                            <i class="fa-solid fa-bell mr-1"></i> Testar Sinal
                         </button>
-                        <button onclick="testCurrentVoice()" class="bg-slate-800 hover:bg-slate-700 text-emerald-400 border border-emerald-500/30 text-xs font-bold px-3 py-2 rounded-xl flex items-center space-x-1">
-                            <i class="fa-solid fa-comment-dots"></i>
-                            <span>Testar Voz Completa</span>
+                        <button onclick="testCurrentVoice()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-3 py-2 rounded-xl text-xs font-bold transition">
+                            <i class="fa-solid fa-volume-high mr-1"></i> Testar Voz
                         </button>
                     </div>
                 </div>
 
             </div>
 
-            <!-- Modal Footer -->
-            <div class="p-4 bg-slate-900 border-t border-slate-800 flex justify-end">
-                <button onclick="closeSettingsModal()" class="bg-sky-600 hover:bg-sky-500 text-white font-extrabold text-sm px-6 py-2.5 rounded-xl transition">
+            <div class="p-4 border-t border-slate-800 bg-slate-900/50 text-right">
+                <button onclick="closeSettingsModal()" class="bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs px-5 py-2.5 rounded-xl transition">
                     Concluir e Salvar
                 </button>
             </div>
@@ -363,13 +350,15 @@
         </div>
     </div>
 
-    <!-- RODAPÉ DA APLICAÇÃO -->
-    <footer class="bg-slate-950 border-t border-slate-900 py-3 text-center text-xs text-slate-500">
-        ChamaMed PRO &copy; 2026 - Sistema Inteligente para Recepção Hospitalar, Postos de Saúde e UBS.
+    <footer class="bg-darkcard border-t border-darkcardborder p-4 text-center text-xs text-slate-500">
+        <p>ChamaMed PRO &copy; 2026 - Sistema Inteligente de Gestão de Filas Hospitalares e UBS</p>
     </footer>
 
-    <!-- SCRIPT PRINCIPAL DO CHAMAMED PRO -->
-    <script>
+    <!-- SCRIPT PRINCIPAL DO CHAMAMED PRO COM SINCRONIZAÇÃO AUTOMÁTICA -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, onSnapshot, collection } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // 15 SALAS INICIAIS PADRÃO DO SISTEMA
         const DEFAULT_ROOMS = [
@@ -390,7 +379,6 @@
             { id: 'room-15', name: 'Farmácia Central', doctor: 'Farm. Marcelo Prado - Dispensação' }
         ];
 
-        // Estado da Aplicação
         let appConfig = {
             doctorName: 'Dr. Jonathan Santos - Clínica Geral',
             roomId: 'room-1',
@@ -402,25 +390,126 @@
         let callHistory = [];
         let currentCall = null;
         let audioCtx = null;
+        let audioUnlocked = false;
+        let lastProcessedCallId = null;
 
-        // Inicialização
-        window.addEventListener('DOMContentLoaded', () => {
+        // Firebase & Broadcast Variables
+        let db = null;
+        let auth = null;
+        let currentUser = null;
+        let broadcastChannel = null;
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'chamamed-app';
+
+        window.addEventListener('DOMContentLoaded', async () => {
             loadStoredConfig();
             initClock();
+            initBroadcastSync();
+            await initFirebaseSync();
             renderRoomSelectOptions();
             onRoomSelectChange();
             updateHistoryUI();
         });
 
-        // Carregar configurações salvas
+        // Configurar BroadcastChannel para sincronização instantânea em abas locais
+        function initBroadcastSync() {
+            try {
+                broadcastChannel = new BroadcastChannel('chamamed_local_sync');
+                broadcastChannel.onmessage = (event) => {
+                    if (event.data && event.data.type === 'NEW_CALL') {
+                        handleIncomingCall(event.data.call, false);
+                    }
+                };
+            } catch(e) {
+                console.log("BroadcastChannel não suportado:", e);
+            }
+        }
+
+        async function initFirebaseSync() {
+            if (typeof __firebase_config === 'undefined') {
+                console.log("Variável __firebase_config ausente. Operando em Modo Broadcast Local.");
+                updateSyncStatusUI('Sincronizado Localmente', true);
+                return;
+            }
+
+            try {
+                const firebaseConfig = JSON.parse(__firebase_config);
+                const app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+                db = getFirestore(app);
+
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    const cred = await signInWithCustomToken(auth, __initial_auth_token);
+                    currentUser = cred.user;
+                } else {
+                    const cred = await signInAnonymously(auth);
+                    currentUser = cred.user;
+                }
+
+                updateSyncStatusUI('Sincronização Automática Ativa', true);
+
+                // Listener em Tempo Real Automático para Chamadas
+                const callsCollection = collection(db, 'artifacts', appId, 'public', 'data', 'calls');
+                onSnapshot(callsCollection, (snapshot) => {
+                    let calls = [];
+                    snapshot.forEach(docSnap => {
+                        calls.push({ id: docSnap.id, ...docSnap.data() });
+                    });
+
+                    // Ordenar do mais recente para o mais antigo
+                    calls.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+
+                    if (calls.length > 0) {
+                        const topCall = calls[0];
+                        if (topCall.id !== lastProcessedCallId) {
+                            handleIncomingCall(topCall, true);
+                        }
+                    }
+
+                    callHistory = calls;
+                    updateHistoryUI();
+                }, (error) => {
+                    console.error("Erro no listener do Firestore:", error);
+                    updateSyncStatusUI('Sincronizado Localmente', true);
+                });
+
+            } catch (err) {
+                console.error("Erro ao inicializar Firebase:", err);
+                updateSyncStatusUI('Sincronizado Localmente', true);
+            }
+        }
+
+        function updateSyncStatusUI(text, isOnline) {
+            const statusText = document.getElementById('sync-status-text');
+            if (statusText) {
+                statusText.innerHTML = `
+                    <span class="w-2 h-2 rounded-full ${isOnline ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'}"></span>
+                    <span>${text}</span>
+                `;
+            }
+        }
+
+        // Processar Chamada Recebida
+        function handleIncomingCall(call, isFromCloud) {
+            lastProcessedCallId = call.id;
+            currentCall = call;
+
+            updateTVPanelUI(call);
+
+            // Emitir som se a chamada tiver sido feita nos últimos 15 segundos
+            const isRecent = call.timestamp ? (Date.now() - call.timestamp) < 15000 : true;
+
+            if (isRecent) {
+                playCallSequence(call, call.repeats || 2);
+            }
+        }
+
+        // Carregar e Salvar Configurações
         function loadStoredConfig() {
             const saved = localStorage.getItem('chamamed_config');
             if (saved) {
                 try {
                     const parsed = JSON.parse(saved);
-                    if (parsed.rooms && parsed.rooms.length > 0) {
-                        appConfig.rooms = parsed.rooms;
-                    }
+                    if (parsed.rooms && parsed.rooms.length > 0) appConfig.rooms = parsed.rooms;
                     if (parsed.doctorName) appConfig.doctorName = parsed.doctorName;
                     if (parsed.roomId) appConfig.roomId = parsed.roomId;
                     if (parsed.speechRate) appConfig.speechRate = parsed.speechRate;
@@ -435,7 +524,6 @@
             localStorage.setItem('chamamed_config', JSON.stringify(appConfig));
         }
 
-        // Relógio
         function initClock() {
             function update() {
                 const now = new Date();
@@ -446,7 +534,6 @@
             setInterval(update, 1000);
         }
 
-        // Alternar Visão (Profissional vs TV)
         function switchView(view) {
             const btnDoc = document.getElementById('btn-view-doctor');
             const btnTv = document.getElementById('btn-view-tv');
@@ -454,22 +541,52 @@
             const panelTv = document.getElementById('view-tv-panel');
 
             if (view === 'doctor') {
-                btnDoc.className = 'px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-200 bg-sky-600 text-white shadow-md flex items-center space-x-2';
-                btnTv.className = 'px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-200 text-slate-400 hover:text-white flex items-center space-x-2';
+                btnDoc.className = 'px-4 py-2 rounded-xl font-semibold text-xs sm:text-sm transition-all duration-200 bg-sky-600 text-white shadow-md flex items-center space-x-2';
+                btnTv.className = 'px-4 py-2 rounded-xl font-semibold text-xs sm:text-sm transition-all duration-200 text-slate-400 hover:text-white flex items-center space-x-2';
                 panelDoc.classList.remove('hidden');
                 panelTv.classList.add('hidden');
             } else {
-                btnTv.className = 'px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-200 bg-sky-600 text-white shadow-md flex items-center space-x-2';
-                btnDoc.className = 'px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-200 text-slate-400 hover:text-white flex items-center space-x-2';
+                btnTv.className = 'px-4 py-2 rounded-xl font-semibold text-xs sm:text-sm transition-all duration-200 bg-sky-600 text-white shadow-md flex items-center space-x-2';
+                btnDoc.className = 'px-4 py-2 rounded-xl font-semibold text-xs sm:text-sm transition-all duration-200 text-slate-400 hover:text-white flex items-center space-x-2';
                 panelTv.classList.remove('hidden');
                 panelDoc.classList.add('hidden');
             }
         }
 
+        function enableTVAudio() {
+            try {
+                if (!audioCtx) {
+                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+                
+                if ('speechSynthesis' in window) {
+                    const testUtterance = new SpeechSynthesisUtterance('');
+                    window.speechSynthesis.speak(testUtterance);
+                }
 
-        // Renderizar Dropdown de Salas
+                audioUnlocked = true;
+
+                const banner = document.getElementById('tv-audio-unlock-banner');
+                if (banner) {
+                    banner.className = 'bg-emerald-500/20 border border-emerald-500/40 p-4 rounded-3xl flex items-center justify-between text-emerald-300 text-xs sm:text-sm font-bold';
+                    banner.innerHTML = `
+                        <span class="flex items-center space-x-2">
+                            <i class="fa-solid fa-circle-check text-emerald-400 text-lg"></i>
+                            <span>Áudio e Voz da TV Desbloqueados e Ativos!</span>
+                        </span>
+                    `;
+                }
+            } catch(e) {
+                console.error("Erro ao desbloquear áudio:", e);
+            }
+        }
+
         function renderRoomSelectOptions() {
             const select = document.getElementById('doc-room-select');
+            if (!select) return;
             select.innerHTML = '';
             appConfig.rooms.forEach(room => {
                 const opt = document.createElement('option');
@@ -480,9 +597,9 @@
             });
         }
 
-        // Ao alterar a Sala no Seletor Principal
         function onRoomSelectChange() {
             const select = document.getElementById('doc-room-select');
+            if (!select) return;
             appConfig.roomId = select.value;
             const selectedRoomObj = appConfig.rooms.find(r => r.id === appConfig.roomId);
             
@@ -504,8 +621,6 @@
             renderRoomSelectOptions();
         }
 
-
-        // Efeito Sonoro (Chime Hospitalar via Web Audio API)
         function playChimeSound(onEnded) {
             try {
                 if (!audioCtx) {
@@ -518,7 +633,6 @@
                 const now = audioCtx.currentTime;
                 
                 if (appConfig.chimeType === 'hospital') {
-                    // Notas hospitalares harmoniosas (G4, C5, E5)
                     const frequencies = [392.00, 523.25, 659.25];
                     frequencies.forEach((freq, idx) => {
                         const osc = audioCtx.createOscillator();
@@ -539,7 +653,6 @@
                     });
                     setTimeout(onEnded, 1200);
                 } else if (appConfig.chimeType === 'modern') {
-                    // Gongo duplo suave
                     [523.25, 659.25].forEach((freq, idx) => {
                         const osc = audioCtx.createOscillator();
                         const gain = audioCtx.createGain();
@@ -554,7 +667,6 @@
                     });
                     setTimeout(onEnded, 900);
                 } else {
-                    // Bip Clínico
                     const osc = audioCtx.createOscillator();
                     const gain = audioCtx.createGain();
                     osc.type = 'sine';
@@ -573,8 +685,7 @@
             }
         }
 
-
-        // SÍNTESE DE VOZ - FALA PACIENTE, SALA E MÉDICO/PROCEDIMENTO
+        // LOCUÇÃO DE VOZ COMPLETA (PACIENTE + SALA + MÉDICO)
         function speakPatientCall(call, onComplete) {
             if (!('speechSynthesis' in window)) {
                 setTimeout(onComplete, 2500);
@@ -584,17 +695,13 @@
             window.speechSynthesis.cancel();
 
             let destination = call.roomName;
-            
-            // Tratamento da fala do médico / especialidade
             if (call.doctorName) {
-                // Substitui traços e barras por vírgula para pausa natural na fala
+                // Substitui hífens e barras por vírgulas para pausar naturalmente a fala
                 const cleanDoctor = call.doctorName.replace(/[-/]/g, ', ');
                 destination += `, ${cleanDoctor}`;
             }
 
-            // Construção da frase completa enunciada pelo sistema
             let phrase = `Atenção: Paciente, ${call.patientName}. Dirigir-se à ${destination}.`;
-            
             if (call.isPreferential) {
                 phrase = `Atenção: Paciente preferencial, ${call.patientName}. Dirigir-se à ${destination}.`;
             }
@@ -609,9 +716,7 @@
             window.speechSynthesis.speak(utterance);
         }
 
-
-        // Efetuar Chamada de Paciente
-        function triggerCall(isRecall = false, patientOverride = null) {
+        async function triggerCall(isRecall = false, patientOverride = null) {
             const inputField = document.getElementById('patient-name-input');
             const name = patientOverride || inputField.value.trim();
 
@@ -625,20 +730,38 @@
             const isPreferential = document.getElementById('preferential-check').checked;
             const repeatCount = parseInt(document.getElementById('repeat-count').value) || 1;
 
+            const callDocId = 'call-' + Date.now();
             const callData = {
-                id: Date.now(),
+                id: callDocId,
                 patientName: name || (currentCall ? currentCall.patientName : 'Paciente'),
                 roomId: activeRoom.id,
                 roomName: activeRoom.name,
                 doctorName: document.getElementById('doc-name-input').value.trim() || activeRoom.doctor,
                 isPreferential: isPreferential,
                 repeats: repeatCount,
+                timestamp: Date.now(),
                 time: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
             };
 
             currentCall = callData;
-            
-            // Adicionar ao histórico se não for uma simples rechamada
+            lastProcessedCallId = callDocId;
+
+            // 1. Gravar no Firestore para sincronização com outros aparelhos
+            if (db) {
+                try {
+                    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'calls', callDocId);
+                    await setDoc(docRef, callData);
+                } catch(e) {
+                    console.error("Erro ao salvar no Firestore:", e);
+                }
+            }
+
+            // 2. Transmitir via BroadcastChannel para abas no mesmo dispositivo
+            if (broadcastChannel) {
+                broadcastChannel.postMessage({ type: 'NEW_CALL', call: callData });
+            }
+
+            // 3. Atualizar histórico local
             if (!isRecall || !callHistory.some(c => c.id === callData.id)) {
                 callHistory.unshift(callData);
             }
@@ -646,7 +769,7 @@
             updateHistoryUI();
             updateTVPanelUI(callData);
 
-            // Tocar som + falar o nome completo + sala + médico
+            // 4. Executar Som e Voz Localmente
             playCallSequence(callData, repeatCount);
 
             if (!isRecall) {
@@ -662,7 +785,6 @@
             triggerCall(true, currentCall.patientName);
         }
 
-        // Executar sequência de aviso sonoro e repetição de voz
         function playCallSequence(callData, remaining) {
             if (remaining <= 0) return;
 
@@ -677,7 +799,6 @@
             });
         }
 
-        // Atualizar Painel da TV
         function updateTVPanelUI(call) {
             const nameEl = document.getElementById('tv-patient-name');
             const roomEl = document.getElementById('tv-room-name');
@@ -685,67 +806,69 @@
             const badgeEl = document.getElementById('tv-badge-status');
             const cardEl = document.getElementById('tv-main-card');
 
+            if (!nameEl) return;
+
             nameEl.textContent = call.patientName;
             roomEl.textContent = call.roomName;
             docEl.textContent = call.doctorName || 'Atendimento Geral';
 
             if (call.isPreferential) {
                 badgeEl.textContent = '★ PREFERENCIAL';
-                badgeEl.className = 'bg-amber-500/20 text-amber-400 border border-amber-500/30 text-xs px-3 py-1 rounded-full font-bold uppercase tracking-wider';
+                badgeEl.className = 'bg-amber-500/20 text-amber-400 border border-amber-500/30 text-xs sm:text-sm px-4 py-1.5 rounded-full font-extrabold uppercase tracking-widest';
             } else {
                 badgeEl.textContent = 'CHAMADA ATIVA';
-                badgeEl.className = 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-xs px-3 py-1 rounded-full font-bold uppercase tracking-wider';
+                badgeEl.className = 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-xs sm:text-sm px-4 py-1.5 rounded-full font-extrabold uppercase tracking-widest';
             }
 
-            // Animação de piscar para chamar atenção na TV
             cardEl.classList.add('blink-call');
             setTimeout(() => {
                 cardEl.classList.remove('blink-call');
             }, 5000);
         }
 
-        // Atualizar Histórico de Chamadas na UI
         function updateHistoryUI() {
-            // Histórico do Consultório Atual
             const docList = document.getElementById('doc-history-list');
+            if (!docList) return;
+
             const roomCalls = callHistory.filter(c => c.roomId === appConfig.roomId);
 
             if (roomCalls.length === 0) {
-                docList.innerHTML = `<div class="text-center text-slate-500 py-10 text-sm">Nenhum paciente chamado nesta sala ainda.</div>`;
+                docList.innerHTML = `<div class="text-center text-slate-500 py-10 text-xs">Nenhum paciente chamado nesta sala ainda.</div>`;
             } else {
                 docList.innerHTML = roomCalls.map(c => `
                     <div onclick="triggerCall(true, '${c.patientName}')" class="bg-slate-900/90 border border-slate-800 hover:border-sky-500/50 p-3 rounded-2xl flex items-center justify-between cursor-pointer transition">
                         <div class="flex items-center space-x-3">
-                            <div class="p-2 ${c.isPreferential ? 'bg-amber-500/10 text-amber-400' : 'bg-sky-500/10 text-sky-400'} rounded-xl text-sm font-bold">
+                            <div class="p-2 ${c.isPreferential ? 'bg-amber-500/10 text-amber-400' : 'bg-sky-500/10 text-sky-400'} rounded-xl text-xs font-bold">
                                 <i class="fa-solid ${c.isPreferential ? 'fa-wheelchair' : 'fa-user'}"></i>
                             </div>
                             <div>
-                                <h4 class="font-bold text-sm text-white">${c.patientName}</h4>
-                                <span class="text-xs text-slate-400">${c.time} ${c.isPreferential ? '• Preferencial' : ''}</span>
+                                <h4 class="font-bold text-xs text-white">${c.patientName}</h4>
+                                <span class="text-[10px] text-slate-400">${c.time} ${c.isPreferential ? '• Preferencial' : ''}</span>
                             </div>
                         </div>
-                        <span class="text-xs text-sky-400 font-bold bg-sky-500/10 px-2.5 py-1 rounded-lg">Rechamar</span>
+                        <span class="text-[10px] text-sky-400 font-bold bg-sky-500/10 px-2 py-1 rounded-lg">Rechamar</span>
                     </div>
                 `).join('');
             }
 
-            // Histórico Geral na TV
             const tvGrid = document.getElementById('tv-history-grid');
+            if (!tvGrid) return;
+
             if (callHistory.length === 0) {
                 tvGrid.innerHTML = `
-                    <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 text-center text-slate-500 text-sm">Aguardando...</div>
-                    <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 text-center text-slate-500 text-sm">Aguardando...</div>
-                    <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 text-center text-slate-500 text-sm">Aguardando...</div>
-                    <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 text-center text-slate-500 text-sm">Aguardando...</div>
+                    <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 text-center text-slate-500 text-xs">Aguardando...</div>
+                    <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 text-center text-slate-500 text-xs">Aguardando...</div>
+                    <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 text-center text-slate-500 text-xs">Aguardando...</div>
+                    <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 text-center text-slate-500 text-xs">Aguardando...</div>
                 `;
             } else {
                 tvGrid.innerHTML = callHistory.slice(0, 4).map(c => `
                     <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 flex flex-col justify-between">
                         <div>
                             <span class="text-[10px] uppercase font-extrabold ${c.isPreferential ? 'text-amber-400' : 'text-slate-400'}">${c.time} - ${c.roomName}</span>
-                            <h4 class="font-extrabold text-white text-base truncate mt-0.5">${c.patientName}</h4>
+                            <h4 class="font-extrabold text-white text-sm truncate mt-0.5">${c.patientName}</h4>
                         </div>
-                        <p class="text-xs text-sky-300 font-medium truncate mt-2 border-t border-slate-800/80 pt-1.5">${c.doctorName || 'Atendimento'}</p>
+                        <p class="text-[11px] text-sky-300 font-medium truncate mt-2 border-t border-slate-800 pt-1.5">${c.doctorName || 'Atendimento'}</p>
                     </div>
                 `).join('');
             }
@@ -756,8 +879,6 @@
             updateHistoryUI();
         }
 
-
-        // MODAL DE CONFIGURAÇÕES & GERENCIAMENTO DE SALAS
         function openSettingsModal() {
             renderRoomsEditorList();
             document.getElementById('speech-rate').value = appConfig.speechRate;
@@ -771,10 +892,10 @@
             onRoomSelectChange();
         }
 
-        // Renderizar Lista de Edição de Salas no Modal
         function renderRoomsEditorList() {
             const container = document.getElementById('rooms-editor-list');
-            container.innerHTML = appConfig.rooms.map((room, index) => `
+            if (!container) return;
+            container.innerHTML = appConfig.rooms.map((room) => `
                 <div class="bg-slate-900 border border-slate-800 p-3 rounded-2xl flex items-center justify-between gap-3">
                     <div class="flex-grow grid grid-cols-1 sm:grid-cols-2 gap-2">
                         <input type="text" value="${room.name}" onchange="updateRoomField('${room.id}', 'name', this.value)" class="bg-slate-800 border border-slate-700 text-white font-bold text-xs rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-sky-500" placeholder="Nome da Sala">
@@ -797,7 +918,6 @@
             }
         }
 
-        // Adicionar Nova Sala Ilimitada
         function addNewRoomPrompt() {
             const nextNum = appConfig.rooms.length + 1;
             const newRoom = {
@@ -845,6 +965,23 @@
                 speakPatientCall(testCall, () => {});
             });
         }
+
+        // Exportar funções para o escopo global
+        window.switchView = switchView;
+        window.triggerCall = triggerCall;
+        window.triggerRecall = triggerRecall;
+        window.clearCurrentRoomHistory = clearCurrentRoomHistory;
+        window.openSettingsModal = openSettingsModal;
+        window.closeSettingsModal = closeSettingsModal;
+        window.saveDoctorSettings = saveDoctorSettings;
+        window.onRoomSelectChange = onRoomSelectChange;
+        window.updateRoomField = updateRoomField;
+        window.addNewRoomPrompt = addNewRoomPrompt;
+        window.removeRoom = removeRoom;
+        window.saveAudioSettings = saveAudioSettings;
+        window.testCurrentChime = testCurrentChime;
+        window.testCurrentVoice = testCurrentVoice;
+        window.enableTVAudio = enableTVAudio;
     </script>
 </body>
 </html>
