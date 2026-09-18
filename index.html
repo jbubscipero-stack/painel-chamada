@@ -414,7 +414,6 @@
         import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, onSnapshot, collection } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // 15 SALAS INICIAIS PADRÃO DO SISTEMA
         const DEFAULT_ROOMS = [
             { id: 'room-1', name: 'Consultório 01', doctor: 'Dr. Jonathan Santos - Clínica Geral' },
             { id: 'room-2', name: 'Consultório 02', doctor: 'Dra. Ana Silva - Pediatria' },
@@ -490,7 +489,7 @@
                 }
             }
 
-            if (!activeFirebaseConfig && typeof __firebase_config !== 'undefined') {
+            if (!activeFirebaseConfig && typeof __firebase_config !== 'undefined' && __firebase_config) {
                 try {
                     activeFirebaseConfig = JSON.parse(__firebase_config);
                 } catch(e) {
@@ -500,11 +499,11 @@
 
             const badge = document.getElementById('firebase-connection-badge');
 
-            if (!activeFirebaseConfig) {
-                updateSyncStatusUI('Modo Local (Configure o Firebase acima)', false);
+            if (!activeFirebaseConfig || !activeFirebaseConfig.apiKey || !activeFirebaseConfig.projectId) {
+                updateSyncStatusUI('Modo Local Ativo (Configure o Firebase se desejar nuvem)', false);
                 if (badge) {
-                    badge.textContent = 'Não Conectado';
-                    badge.className = 'text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/30';
+                    badge.textContent = 'Modo Local';
+                    badge.className = 'text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-slate-800 text-slate-400';
                 }
                 return;
             }
@@ -549,24 +548,23 @@
                     updateHistoryUI();
                 }, (error) => {
                     console.error("Erro no listener do Firestore:", error);
-                    updateSyncStatusUI('Erro de Conexão Firebase', false);
+                    updateSyncStatusUI('Modo Local (Erro na Nuvem)', false);
                     if (badge) {
-                        badge.textContent = 'Erro de Chave';
-                        badge.className = 'text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-red-500/20 text-red-400 border border-red-500/30';
+                        badge.textContent = 'Erro Conexão';
+                        badge.className = 'text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/30';
                     }
                 });
 
             } catch (err) {
                 console.error("Erro ao inicializar Firebase:", err);
-                updateSyncStatusUI('Erro de Conexão Firebase', false);
+                updateSyncStatusUI('Modo Local (Falha Firebase)', false);
                 if (badge) {
-                    badge.textContent = 'Erro de Chave';
-                    badge.className = 'text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-red-500/20 text-red-400 border border-red-500/30';
+                    badge.textContent = 'Erro Config';
+                    badge.className = 'text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/30';
                 }
             }
         }
 
-        // Preenchimento automático dos campos individuais se colar o JSON no campo de texto
         function autoFillFirebaseFields(text) {
             try {
                 // Tenta extrair valores usando regex caso venha no formato js/json
@@ -844,32 +842,30 @@
             utterance.rate = parseFloat(call.speechRate || appConfig.speechRate || 0.95);
 
             utterance.onend = onComplete;
-            utterance.onerror = onComplete;
-
-            window.speechSynthesis.speak(utterance);
-        }
-
-        async function triggerCall(isRecall = false, patientOverride = null) {
+        function triggerCall(isRecall = false, patientOverride = null) {
             const inputField = document.getElementById('patient-name-input');
-            const name = patientOverride || inputField.value.trim();
+            const name = patientOverride || (inputField ? inputField.value.trim() : '');
 
             if (!name && !isRecall) {
                 alert('Por favor, informe o nome do paciente para efetuar a chamada.');
-                inputField.focus();
+                if (inputField) inputField.focus();
                 return;
             }
 
             const activeRoom = appConfig.rooms.find(r => r.id === appConfig.roomId) || appConfig.rooms[0];
-            const isPreferential = document.getElementById('preferential-check').checked;
-            const repeatCount = parseInt(document.getElementById('repeat-count').value) || 1;
+            const prefCheck = document.getElementById('preferential-check');
+            const isPreferential = prefCheck ? prefCheck.checked : false;
+            const repeatSelect = document.getElementById('repeat-count');
+            const repeatCount = repeatSelect ? (parseInt(repeatSelect.value) || 1) : 2;
 
             const callDocId = 'call-' + Date.now();
+            const docNameInput = document.getElementById('doc-name-input');
             const callData = {
                 id: callDocId,
                 patientName: name || (currentCall ? currentCall.patientName : 'Paciente'),
                 roomId: activeRoom.id,
                 roomName: activeRoom.name,
-                doctorName: document.getElementById('doc-name-input').value.trim() || activeRoom.doctor,
+                doctorName: docNameInput ? (docNameInput.value.trim() || activeRoom.doctor) : activeRoom.doctor,
                 isPreferential: isPreferential,
                 repeats: repeatCount,
                 timestamp: Date.now(),
@@ -879,17 +875,19 @@
             currentCall = callData;
             lastProcessedCallId = callDocId;
 
-            if (db) {
+            if (db && currentUser) {
                 try {
                     const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'calls', callDocId);
-                    await setDoc(docRef, callData);
+                    setDoc(docRef, callData).catch(e => console.error("Erro ao gravar no Firestore:", e));
                 } catch(e) {
-                    console.error("Erro ao salvar no Firestore:", e);
+                    console.error("Erro ao chamar Firestore:", e);
                 }
             }
 
             if (broadcastChannel) {
-                broadcastChannel.postMessage({ type: 'NEW_CALL', call: callData });
+                try {
+                    broadcastChannel.postMessage({ type: 'NEW_CALL', call: callData });
+                } catch(e) {}
             }
 
             if (!isRecall || !callHistory.some(c => c.id === callData.id)) {
@@ -900,7 +898,7 @@
             updateTVPanelUI(callData);
             playCallSequence(callData, repeatCount);
 
-            if (!isRecall) {
+            if (!isRecall && inputField) {
                 inputField.value = '';
             }
         }
