@@ -1,1005 +1,850 @@
 <!DOCTYPE html>
-<html lang="pt-BR" class="h-full">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ChamaMed PRO - Sistema de Chamada Hospitalar e UBS</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <script>
         tailwind.config = {
-            darkMode: 'class',
             theme: {
                 extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
                     colors: {
-                        brand: {
-                            50: '#f0f9ff',
-                            100: '#e0f2fe',
-                            500: '#0284c7',
-                            600: '#0284c7',
-                            700: '#0369a1',
-                            800: '#075985',
-                            900: '#0c4a6e',
-                        },
-                        darkbg: '#0a0f1d',
-                        darkcard: '#111827',
-                        darkcardborder: '#1f2937'
-                    },
-                    animation: {
-                        'pulse-fast': 'pulse 0.8s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-                        'glow': 'glowRing 1.5s infinite alternate',
-                    },
-                    keyframes: {
-                        glowRing: {
-                            '0%': { boxShadow: '0 0 15px rgba(14, 165, 233, 0.4)', borderColor: '#38bdf8' },
-                            '100%': { boxShadow: '0 0 35px rgba(234, 179, 8, 0.8)', borderColor: '#eab308' }
-                        }
+                        darkbg: '#0b1329',
+                        darkcard: '#131e3a',
+                        darkcardborder: '#1e2d52',
+                        brandblue: '#0284c7',
+                        brandaccent: '#38bdf8'
                     }
                 }
             }
         }
     </script>
-    <!-- Firebase Compatibility Libraries -->
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
-        body {
-            font-family: 'Inter', sans-serif;
-            user-select: none;
+        body { background-color: #0b1329; color: #f8fafc; font-family: 'Inter', sans-serif; overflow-x: hidden; }
+        .glow-effect { box-shadow: 0 0 25px rgba(56, 189, 248, 0.25); }
+        .blink-call { animation: pulseGlow 1.2s infinite alternate; }
+        @keyframes pulseGlow {
+            0% { border-color: #38bdf8; box-shadow: 0 0 15px rgba(56, 189, 248, 0.4); }
+            100% { border-color: #ef4444; box-shadow: 0 0 35px rgba(239, 68, 68, 0.8); }
         }
-        .custom-scrollbar::-webkit-scrollbar {
-            width: 6px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-            background: #111827;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: #374151;
-            border-radius: 4px;
-        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #0b1329; }
+        ::-webkit-scrollbar-thumb { background: #1e2d52; border-radius: 4px; }
     </style>
 </head>
-<body class="bg-darkbg text-slate-100 min-h-screen flex flex-col antialiased selection:bg-brand-500 selection:text-white dark">
+<body class="min-h-screen flex flex-col justify-between">
 
-    <!-- Navbar Superior com Navegação de Abas -->
-    <header class="bg-darkcard border-b border-darkcardborder sticky top-0 z-40 px-4 py-3 shadow-lg">
-        <div class="max-w-7xl mx-auto flex flex-wrap justify-between items-center gap-3">
-            <!-- Brand & Logo -->
+    <!-- HEADER NAVBAR -->
+    <header class="bg-darkcard border-b border-darkcardborder px-4 py-3 sticky top-0 z-40 shadow-lg">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+            
+            <!-- Logotipo e Título -->
             <div class="flex items-center space-x-3">
-                <div id="brand-logo-container" class="h-10 w-10 rounded-xl bg-brand-600 flex items-center justify-center text-white font-bold shadow-md shadow-brand-500/20 overflow-hidden">
-                    <img id="app-logo-img" src="" alt="Logo" class="hidden w-full h-full object-cover">
-                    <i id="app-logo-icon" class="fa-solid fa-hospital-user text-xl"></i>
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-sky-600 to-cyan-400 flex items-center justify-center text-white shadow-md">
+                    <i class="fa-solid fa-hospital text-xl"></i>
                 </div>
                 <div>
                     <div class="flex items-center space-x-2">
-                        <span class="font-black text-xl tracking-tight text-white">ChamaMed</span>
-                        <span class="bg-brand-500/20 text-brand-500 text-xs px-2 py-0.5 rounded-full font-bold border border-brand-500/30">PRO</span>
+                        <h1 class="font-extrabold text-lg text-white tracking-wide">ChamaMed</h1>
+                        <span class="bg-sky-500/20 text-sky-400 text-xs font-bold px-2 py-0.5 rounded border border-sky-500/30">PRO</span>
                     </div>
-                    <p class="text-xs text-slate-400 font-medium hidden sm:block">Prefeitura & Health Care System</p>
+                    <p class="text-xs text-slate-400">Prefeitura & Health Care System</p>
                 </div>
             </div>
 
-            <!-- Navegação principal de Abas -->
-            <nav class="flex items-center bg-darkbg p-1 rounded-xl border border-darkcardborder">
-                <button id="btn-tab-doctor" onclick="switchTab('doctor')" class="flex items-center space-x-2 px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-200 bg-brand-600 text-white shadow-md shadow-brand-600/30">
+            <!-- Navegação de Telas -->
+            <div class="flex items-center bg-slate-900/80 p-1 rounded-xl border border-slate-800">
+                <button id="btn-view-doctor" onclick="switchView('doctor')" class="px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-200 bg-sky-600 text-white shadow-md flex items-center space-x-2">
                     <i class="fa-solid fa-user-doctor"></i>
                     <span>Painel do Profissional</span>
                 </button>
-                <button id="btn-tab-tv" onclick="switchTab('tv')" class="flex items-center space-x-2 px-4 py-2 rounded-lg font-semibold text-sm text-slate-400 hover:text-white transition-all duration-200">
-                    <i class="fa-solid fa-tv"></i>
+                <button id="btn-view-tv" onclick="switchView('tv')" class="px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-200 text-slate-400 hover:text-white flex items-center space-x-2">
+                    <i class="fa-solid fa-desktop"></i>
                     <span>Painel TV Chamadas</span>
                 </button>
-            </nav>
+            </div>
 
-            <!-- Ações Rápidas (Fullscreen & Ajustes) -->
-            <div class="flex items-center space-x-2">
-                <button onclick="toggleFullscreen()" title="Tela Cheia" class="p-2.5 rounded-xl bg-darkcard border border-darkcardborder text-slate-400 hover:text-white hover:bg-slate-800 transition">
-                    <i class="fa-solid fa-expand"></i>
-                </button>
-                <button onclick="openModal('settings-modal')" title="Ajustes e Configurações" class="flex items-center space-x-2 px-3 py-2 rounded-xl bg-darkcard border border-darkcardborder text-slate-300 hover:text-white hover:bg-slate-800 transition">
-                    <i class="fa-solid fa-gear text-brand-500"></i>
-                    <span class="text-sm font-semibold hidden md:inline">Ajustes</span>
+            <!-- Botões Rápidos e Data/Hora -->
+            <div class="flex items-center space-x-3">
+                <div id="live-clock" class="text-right hidden sm:block">
+                    <div class="text-lg font-bold font-mono text-sky-400 leading-none" id="clock-time">00:00:00</div>
+                    <div class="text-xs text-slate-400 mt-1" id="clock-date">--/--/----</div>
+                </div>
+                <button onclick="openSettingsModal()" class="p-2.5 bg-darkcardborder/60 hover:bg-darkcardborder text-slate-200 rounded-xl transition border border-slate-700/50 flex items-center space-x-2 text-sm font-semibold">
+                    <i class="fa-solid fa-gear text-sky-400"></i>
+                    <span class="hidden md:inline">Ajustes</span>
                 </button>
             </div>
+
         </div>
     </header>
 
-    <!-- Conteúdo Principal -->
-    <main class="flex-grow container max-w-7xl mx-auto p-4 sm:p-6">
+    <!-- MAIN CONTENT CONTAINERS -->
+    <main class="flex-grow max-w-7xl w-full mx-auto p-4 md:p-6 space-y-6">
+
+        <!-- STATUS TOP BAR (PROFISSIONAL + SALA ATIVA) -->
+        <div id="status-bar" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            
+            <!-- PROFISSIONAL / ATENDIMENTO -->
+            <div class="bg-darkcard border border-darkcardborder rounded-2xl p-4 flex items-center space-x-4 shadow-sm">
+                <div class="p-3 bg-sky-500/10 text-sky-400 rounded-xl border border-sky-500/20 text-xl">
+                    <i class="fa-solid fa-id-card"></i>
+                </div>
+                <div class="flex-grow min-w-0">
+                    <span class="text-xs uppercase font-bold text-slate-400 tracking-wider">Profissional / Atendimento</span>
+                    <input type="text" id="doc-name-input" onchange="saveDoctorSettings()" class="bg-slate-900/90 text-white font-bold text-sm w-full focus:outline-none border border-slate-700 rounded-lg px-2.5 py-1 mt-1 truncate focus:border-sky-500 transition" placeholder="Ex: Dr. Jonathan Santos - Clínica Geral">
+                </div>
+            </div>
+
+            <!-- LOCAL / SALA SELECTOR -->
+            <div class="bg-darkcard border border-darkcardborder rounded-2xl p-4 flex items-center space-x-4 shadow-sm">
+                <div class="p-3 bg-emerald-500/10 text-emerald-400 rounded-xl border border-emerald-500/20 text-xl">
+                    <i class="fa-solid fa-door-open"></i>
+                </div>
+                <div class="flex-grow min-w-0">
+                    <span class="text-xs uppercase font-bold text-slate-400 tracking-wider">Local / Sala</span>
+                    <select id="doc-room-select" onchange="onRoomSelectChange()" class="bg-slate-900 text-white font-bold text-sm w-full focus:outline-none border border-slate-700 rounded-lg px-2.5 py-1 mt-1 truncate focus:border-emerald-500 transition cursor-pointer">
+                        <!-- Opções dinâmicas das salas -->
+                    </select>
+                    <p class="text-xs text-emerald-400 font-medium mt-1">● Ativo e Pronto</p>
+                </div>
+            </div>
+
+            <!-- MODO DE OPERAÇÃO -->
+            <div class="bg-darkcard border border-darkcardborder rounded-2xl p-4 flex items-center space-x-4 shadow-sm">
+                <div class="p-3 bg-indigo-500/10 text-indigo-400 rounded-xl border border-indigo-500/20 text-xl">
+                    <i class="fa-solid fa-wifi"></i>
+                </div>
+                <div>
+                    <span class="text-xs uppercase font-bold text-slate-400 tracking-wider">Modo de Operação</span>
+                    <h3 class="text-sm font-bold text-indigo-400 mt-0.5">Sincronização Local / Multi-Sessão</h3>
+                    <p class="text-xs text-slate-400">Avisos e áudio integrados</p>
+                </div>
+            </div>
+
+        </div>
 
         <!-- VIEW 1: PAINEL DO PROFISSIONAL -->
-        <section id="view-doctor" class="space-y-6">
-            <!-- Cards de Status da Sessão / Configurações do Profissional -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div class="bg-darkcard border border-darkcardborder rounded-2xl p-4 flex items-center space-x-4 shadow-sm">
-                    <div class="p-3 bg-brand-500/10 text-brand-500 rounded-xl border border-brand-500/20 text-xl">
-                        <i class="fa-solid fa-id-card"></i>
-                    </div>
-                    <div class="flex-grow min-w-0">
-                        <span class="text-xs uppercase font-bold text-slate-400 tracking-wider">Profissional / Atendimento</span>
-                        <input type="text" id="doc-name-input" value="Dr. Jonathan Santos" onchange="saveDoctorSettings()" class="bg-transparent text-white font-bold text-lg w-full focus:outline-none focus:border-b border-brand-500 truncate" placeholder="Nome do Profissional">
-                        <p class="text-xs text-slate-400">Clínica Geral / UBS Centro</p>
-                    </div>
-                </div>
-
-                <div class="bg-darkcard border border-darkcardborder rounded-2xl p-4 flex items-center space-x-4 shadow-sm">
-                    <div class="p-3 bg-emerald-500/10 text-emerald-400 rounded-xl border border-emerald-500/20 text-xl">
-                        <i class="fa-solid fa-door-open"></i>
-                    </div>
-                    <div class="flex-grow min-w-0">
-                        <span class="text-xs uppercase font-bold text-slate-400 tracking-wider">Local / Sala</span>
-                        <select id="doc-room-select" onchange="saveDoctorSettings()" class="bg-slate-900 text-white font-bold text-sm w-full focus:outline-none border border-slate-700 rounded-lg px-2 py-1 mt-1 truncate">
-                            <!-- Seleção dinâmica de salas -->
-                        </select>
-                        <p class="text-xs text-emerald-400 font-medium mt-1">● Ativo e Pronto</p>
-                    </div>
-                </div>
-
-                <div class="bg-darkcard border border-darkcardborder rounded-2xl p-4 flex items-center space-x-4 shadow-sm">
-                    <div class="p-3 bg-purple-500/10 text-purple-400 rounded-xl border border-purple-500/20 text-xl">
-                        <i class="fa-solid fa-wifi"></i>
-                    </div>
-                    <div class="flex-grow min-w-0">
-                        <span class="text-xs uppercase font-bold text-slate-400 tracking-wider">Modo de Operação</span>
-                        <div id="firebase-status-badge" class="flex items-center space-x-1.5 mt-0.5">
-                            <span class="h-2.5 w-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                            <span class="text-sm font-bold text-slate-200">Local (Simulação)</span>
-                        </div>
-                        <p class="text-xs text-slate-400" id="firebase-status-desc">Conectado / Pronto para chamar</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Form de Chamada Principal -->
-            <div class="bg-darkcard border border-darkcardborder rounded-3xl p-6 md:p-8 shadow-xl max-w-3xl mx-auto">
-                <div class="flex items-center justify-between mb-6 pb-4 border-b border-darkcardborder">
-                    <div class="flex items-center space-x-3">
-                        <div class="p-3 bg-brand-600/20 text-brand-500 rounded-2xl">
-                            <i class="fa-solid fa-bullhorn text-2xl"></i>
-                        </div>
-                        <div>
-                            <h2 class="text-xl font-bold text-white">Chamar Paciente</h2>
-                            <p class="text-sm text-slate-400">Emita a chamada para a TV no Saguão com som e voz</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="space-y-6">
-                    <!-- Digitação do Nome/Ficha -->
+        <section id="view-doctor-panel" class="space-y-6">
+            
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                
+                <!-- EMISSÃO DE CHAMADA DE PACIENTE -->
+                <div class="lg:col-span-7 bg-darkcard border border-darkcardborder rounded-3xl p-6 shadow-xl relative overflow-hidden flex flex-col justify-between">
                     <div>
-                        <label class="block text-sm font-bold text-slate-300 mb-2">
-                            Nome Completo do Paciente ou Número da Ficha
-                        </label>
-                        <div class="relative">
-                            <input type="text" id="input-patient" placeholder="Ex: Maria Aparecida Silva ou Ficha A-102" onkeydown="if(event.key==='Enter') triggerCall()" class="w-full bg-darkbg border border-slate-700 rounded-2xl px-5 py-4 text-white text-lg font-semibold placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition">
-                            <button onclick="clearPatientInput()" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 p-1">
-                                <i class="fa-solid fa-circle-xmark text-lg"></i>
-                            </button>
+                        <div class="flex items-center justify-between pb-4 mb-4 border-b border-slate-800">
+                            <h2 class="text-xl font-extrabold text-white flex items-center space-x-2">
+                                <i class="fa-solid fa-bullhorn text-sky-400"></i>
+                                <span>Chamar Novo Paciente</span>
+                            </h2>
+                            <span class="text-xs bg-sky-500/10 text-sky-400 px-3 py-1 rounded-full font-bold border border-sky-500/20">Chamada por Voz Ativa</span>
                         </div>
-                    </div>
 
-                    <!-- Opções Adicionais (Preferencial e Repetições) -->
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <label class="flex items-center space-x-3 bg-darkbg border border-slate-800 p-4 rounded-2xl cursor-pointer hover:border-slate-700 transition">
-                            <input type="checkbox" id="check-preferential" class="w-5 h-5 rounded border-slate-700 text-amber-500 focus:ring-amber-500/20 bg-darkcard">
-                            <div class="flex items-center space-x-2">
-                                <i class="fa-solid fa-wheelchair text-amber-500"></i>
-                                <span class="font-bold text-sm text-amber-400">Atendimento Preferencial</span>
+                        <!-- Formulário de Nome do Paciente -->
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-bold text-slate-300 mb-2">Nome Completo do Paciente:</label>
+                                <div class="relative">
+                                    <input type="text" id="patient-name-input" placeholder="Digite ou selecione o nome do paciente..." autocomplete="off" class="w-full bg-slate-900 border-2 border-slate-700 focus:border-sky-500 text-white font-bold text-lg rounded-2xl px-4 py-3.5 pl-11 focus:outline-none transition placeholder-slate-500">
+                                    <i class="fa-solid fa-user text-slate-500 absolute left-4 top-1/2 -translate-y-1/2 text-lg"></i>
+                                </div>
                             </div>
-                        </label>
 
-                        <div class="flex items-center justify-between bg-darkbg border border-slate-800 p-4 rounded-2xl">
-                            <span class="text-sm font-bold text-slate-300 flex items-center space-x-2">
-                                <i class="fa-solid fa-volume-high text-brand-500"></i>
-                                <span>Repetições da Voz</span>
-                            </span>
-                            <select id="select-repeats" class="bg-darkcard border border-slate-700 text-white rounded-xl px-3 py-1.5 font-bold text-sm focus:outline-none focus:ring-2 focus:ring-brand-500">
-                                <option value="1">1 vez</option>
-                                <option value="2" selected>2 vezes</option>
-                                <option value="3">3 vezes</option>
-                            </select>
+                            <!-- Opções de Chamada -->
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                                <!-- Preferencial Toggle -->
+                                <label class="flex items-center space-x-3 bg-slate-900/60 p-3.5 rounded-2xl border border-slate-800 cursor-pointer hover:border-amber-500/50 transition">
+                                    <input type="checkbox" id="preferential-check" class="w-5 h-5 rounded text-amber-500 focus:ring-amber-500 focus:ring-offset-slate-900 bg-slate-800 border-slate-700">
+                                    <div>
+                                        <span class="font-bold text-sm text-amber-400 flex items-center space-x-1.5">
+                                            <i class="fa-solid fa-wheelchair"></i>
+                                            <span>Atendimento Preferencial</span>
+                                        </span>
+                                        <p class="text-xs text-slate-400">Anuncia Prioridade na TV</p>
+                                    </div>
+                                </label>
+
+                                <!-- Quantidade de Repetições -->
+                                <div class="bg-slate-900/60 p-3.5 rounded-2xl border border-slate-800 flex items-center justify-between">
+                                    <div>
+                                        <span class="font-bold text-sm text-slate-300">Repetições</span>
+                                        <p class="text-xs text-slate-400">Voz e Alerta Sonoro</p>
+                                    </div>
+                                    <select id="repeat-count" class="bg-slate-800 text-white font-bold text-sm rounded-xl px-3 py-1.5 border border-slate-700 focus:outline-none">
+                                        <option value="1">1 Vez</option>
+                                        <option value="2" selected>2 Vezes</option>
+                                        <option value="3">3 Vezes</option>
+                                    </select>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
-                    <!-- Botões de Ação Principais -->
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
-                        <button onclick="triggerCall()" class="sm:col-span-2 flex items-center justify-center space-x-3 bg-brand-600 hover:bg-brand-500 text-white font-extrabold text-lg py-4 px-6 rounded-2xl shadow-lg shadow-brand-600/30 transition transform active:scale-95">
-                            <i class="fa-solid fa-bullhorn"></i>
-                            <span>CHAMAR AGORA</span>
+                    <!-- Botões de Ação de Chamada -->
+                    <div class="pt-6 mt-6 border-t border-slate-800 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <button onclick="triggerCall(false)" class="bg-gradient-to-r from-sky-600 to-sky-500 hover:from-sky-500 hover:to-sky-400 text-white font-extrabold text-base py-4 px-6 rounded-2xl shadow-lg shadow-sky-600/30 flex items-center justify-center space-x-3 transition active:scale-[0.98]">
+                            <i class="fa-solid fa-volume-high text-xl"></i>
+                            <span>CHAMAR PACIENTE</span>
                         </button>
-                        
-                        <button onclick="recallLast()" id="btn-recall" disabled class="flex items-center justify-center space-x-2 bg-slate-800 hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed text-amber-400 font-bold py-4 px-4 rounded-2xl border border-slate-700 transition">
+
+                        <button onclick="triggerRecall()" class="bg-slate-800 hover:bg-slate-700 text-amber-400 border border-amber-500/30 font-bold text-base py-4 px-6 rounded-2xl flex items-center justify-center space-x-2 transition active:scale-[0.98]">
                             <i class="fa-solid fa-rotate-right"></i>
-                            <span>Rechamar Último</span>
+                            <span>RECHAMAR ÚLTIMO</span>
                         </button>
                     </div>
+
                 </div>
+
+                <!-- HISTÓRICO RECENTE DO CONSULTÓRIO -->
+                <div class="lg:col-span-5 bg-darkcard border border-darkcardborder rounded-3xl p-6 shadow-xl flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between pb-4 mb-4 border-b border-slate-800">
+                            <h3 class="text-lg font-bold text-white flex items-center space-x-2">
+                                <i class="fa-solid fa-clock-rotate-left text-emerald-400"></i>
+                                <span>Histórico desta Sala</span>
+                            </h3>
+                            <button onclick="clearCurrentRoomHistory()" class="text-xs text-slate-400 hover:text-red-400 transition">Limpar</button>
+                        </div>
+
+                        <div id="doc-history-list" class="space-y-3 max-h-[320px] overflow-y-auto pr-1">
+                            <!-- Inserido dinamicamente via JS -->
+                            <div class="text-center text-slate-500 py-10 text-sm">Nenhum paciente chamado nesta sala ainda.</div>
+                        </div>
+                    </div>
+
+                    <div class="pt-4 border-t border-slate-800 text-xs text-slate-400 text-center">
+                        Toque no paciente do histórico para rechamar rapidamente.
+                    </div>
+                </div>
+
             </div>
 
-            <!-- Histórico Local do Profissional -->
-            <div class="bg-darkcard border border-darkcardborder rounded-3xl p-6 shadow-xl max-w-3xl mx-auto">
-                <h3 class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4 flex items-center justify-between">
-                    <span><i class="fa-solid fa-history me-2 text-brand-500"></i>Últimos Pacientes Chamados</span>
-                    <span id="history-count" class="bg-slate-800 text-slate-300 px-2.5 py-0.5 rounded-full text-xs">0 chamadas</span>
-                </h3>
-                <div id="doctor-history-list" class="space-y-2">
-                    <p class="text-slate-500 text-sm italic text-center py-4">Nenhum paciente chamado nesta sessão.</p>
-                </div>
-            </div>
         </section>
 
-        <!-- VIEW 2: PAINEL TV CHAMADAS (Saguão) -->
-        <section id="view-tv" class="hidden space-y-6">
-            <!-- Header do Saguão -->
-            <div class="flex flex-col md:flex-row justify-between items-center bg-darkcard border border-darkcardborder p-5 rounded-3xl shadow-lg gap-4">
-                <div class="flex items-center space-x-4">
-                    <div id="tv-logo-container" class="h-14 w-14 rounded-2xl bg-brand-600 flex items-center justify-center text-white text-2xl font-bold shadow-md shadow-brand-500/20 overflow-hidden">
-                        <img id="tv-logo-img" src="" alt="Logo" class="hidden w-full h-full object-cover">
-                        <i id="tv-logo-icon" class="fa-solid fa-hospital-user"></i>
+        <!-- VIEW 2: PAINEL DA TV DE CHAMADAS -->
+        <section id="view-tv-panel" class="hidden space-y-6">
+            
+            <!-- CARD DE CHAMADA EM DESTAQUE (TV) -->
+            <div id="tv-main-card" class="bg-gradient-to-b from-darkcard to-slate-900 border-2 border-darkcardborder rounded-3xl p-8 text-center shadow-2xl relative overflow-hidden transition-all duration-300">
+                
+                <div class="absolute top-4 right-6 flex items-center space-x-2">
+                    <span id="tv-badge-status" class="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-xs px-3 py-1 rounded-full font-bold uppercase tracking-wider">Aguardando Chamada</span>
+                </div>
+
+                <p class="text-xs sm:text-sm font-extrabold uppercase text-sky-400 tracking-widest mb-2">PACIENTE CHAMADO</p>
+                
+                <!-- NOME DO PACIENTE EM DESTAQUE -->
+                <h2 id="tv-patient-name" class="text-3xl sm:text-5xl md:text-6xl font-black text-white tracking-tight my-4 drop-shadow-md">
+                    -- AGUARDANDO --
+                </h2>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-3xl mx-auto mt-6 pt-6 border-t border-slate-800">
+                    <!-- SALA / CONSULTÓRIO -->
+                    <div class="bg-slate-900/80 p-4 rounded-2xl border border-slate-800">
+                        <span class="text-xs uppercase font-extrabold text-slate-400 tracking-wider">LOCAL DE ATENDIMENTO</span>
+                        <h3 id="tv-room-name" class="text-2xl sm:text-3xl font-black text-emerald-400 mt-1">--</h3>
                     </div>
-                    <div>
-                        <h1 class="text-2xl font-black tracking-tight text-white flex items-center space-x-2">
-                            <span>PAINEL DE ATENDIMENTO</span>
-                        </h1>
-                        <p class="text-sm text-brand-500 font-semibold" id="tv-header-subtitle">Saguão de Espera Principal • UBS Centro</p>
+
+                    <!-- MÉDICO / PROCEDIMENTO -->
+                    <div class="bg-slate-900/80 p-4 rounded-2xl border border-slate-800">
+                        <span class="text-xs uppercase font-extrabold text-slate-400 tracking-wider">MÉDICO / PROCEDIMENTO</span>
+                        <h3 id="tv-doctor-name" class="text-xl sm:text-2xl font-extrabold text-sky-300 mt-1 truncate">--</h3>
                     </div>
                 </div>
 
-                <div class="flex items-center space-x-6 text-center md:text-right">
-                    <div class="bg-darkbg px-5 py-2.5 rounded-2xl border border-darkcardborder">
-                        <div id="tv-clock" class="text-2xl md:text-3xl font-black text-amber-400 tracking-wider">00:00:00</div>
-                        <div id="tv-date" class="text-xs text-slate-400 font-medium capitalize">Sexta-feira, 18 de Setembro</div>
-                    </div>
-                </div>
             </div>
 
-            <!-- Card de Destaque da Chamada em Tempo Real -->
-            <div id="tv-main-card" class="bg-darkcard border-2 border-darkcardborder rounded-3xl p-8 md:p-12 text-center shadow-2xl relative overflow-hidden transition-all duration-300">
-                <!-- Badge de Atendimento Preferencial -->
-                <div id="tv-preferential-badge" class="hidden inline-flex items-center space-x-2 bg-amber-500/20 text-amber-400 border border-amber-500/40 px-5 py-2 rounded-full font-black text-base md:text-lg mb-6 animate-bounce">
-                    <i class="fa-solid fa-wheelchair"></i>
-                    <span>ATENDIMENTO PREFERENCIAL</span>
-                </div>
-
-                <!-- Título do Paciente -->
-                <p class="text-slate-400 text-xs md:text-sm font-black uppercase tracking-widest mb-2">PACIENTE CHAMADO</p>
-                <div id="tv-patient-display" class="text-4xl md:text-6xl lg:text-7xl font-black text-amber-400 tracking-tight leading-tight mb-8 break-words text-shadow">
-                    AGUARDANDO...
-                </div>
-
-                <div class="h-0.5 bg-gradient-to-r from-transparent via-slate-700 to-transparent my-8"></div>
-
-                <!-- Detalhes da Sala e do Profissional -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-                    <div class="bg-darkbg/60 p-6 rounded-2xl border border-slate-800">
-                        <p class="text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">LOCAL / SALA DE ATENDIMENTO</p>
-                        <div id="tv-room-display" class="text-2xl md:text-4xl font-extrabold text-emerald-400">--</div>
-                    </div>
-
-                    <div class="bg-darkbg/60 p-6 rounded-2xl border border-slate-800">
-                        <p class="text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">PROFISSIONAL / SERVIÇO</p>
-                        <div id="tv-doctor-display" class="text-2xl md:text-3xl font-extrabold text-slate-200">--</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Histórico Recente na TV (Grade Inferior) -->
-            <div>
-                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 px-1 flex items-center justify-between">
-                    <span><i class="fa-solid fa-clock-rotate-left me-2 text-brand-500"></i>Chamadas Anteriores</span>
-                    <span class="text-slate-500">Exibindo últimos registrados</span>
+            <!-- HISTÓRICO DE ÚLTIMAS CHAMADAS DA TV -->
+            <div class="bg-darkcard border border-darkcardborder rounded-3xl p-6 shadow-xl">
+                <h3 class="text-base font-extrabold text-slate-300 mb-4 uppercase tracking-wider flex items-center space-x-2">
+                    <i class="fa-solid fa-list-ol text-sky-400"></i>
+                    <span>Últimas Chamadas Painel Geral</span>
                 </h3>
-                <div id="tv-history-grid" class="grid grid-cols-2 md:grid-cols-4 gap-3">
-                    <div class="bg-darkcard border border-darkcardborder p-4 rounded-2xl text-center opacity-40">
-                        <span class="text-xs text-slate-500 block font-mono">--:--</span>
-                        <div class="font-bold text-slate-300 truncate">Sem chamadas</div>
-                        <div class="text-xs text-slate-500 truncate">--</div>
-                    </div>
-                    <div class="bg-darkcard border border-darkcardborder p-4 rounded-2xl text-center opacity-40">
-                        <span class="text-xs text-slate-500 block font-mono">--:--</span>
-                        <div class="font-bold text-slate-300 truncate">Sem chamadas</div>
-                        <div class="text-xs text-slate-500 truncate">--</div>
-                    </div>
-                    <div class="bg-darkcard border border-darkcardborder p-4 rounded-2xl text-center opacity-40">
-                        <span class="text-xs text-slate-500 block font-mono">--:--</span>
-                        <div class="font-bold text-slate-300 truncate">Sem chamadas</div>
-                        <div class="text-xs text-slate-500 truncate">--</div>
-                    </div>
-                    <div class="bg-darkcard border border-darkcardborder p-4 rounded-2xl text-center opacity-40">
-                        <span class="text-xs text-slate-500 block font-mono">--:--</span>
-                        <div class="font-bold text-slate-300 truncate">Sem chamadas</div>
-                        <div class="text-xs text-slate-500 truncate">--</div>
-                    </div>
+
+                <div id="tv-history-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+                    <!-- Cards dinâmicos inseridos via JS -->
+                    <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 text-center text-slate-500 text-sm">Aguardando...</div>
+                    <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 text-center text-slate-500 text-sm">Aguardando...</div>
+                    <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 text-center text-slate-500 text-sm">Aguardando...</div>
+                    <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 text-center text-slate-500 text-sm">Aguardando...</div>
                 </div>
             </div>
+
         </section>
 
     </main>
 
-    <!-- MODAL DE CONFIGURAÇÕES E AJUSTES -->
-    <div id="settings-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+    <!-- MODAL DE CONFIGURAÇÕES & GERENCIAMENTO DE SALAS -->
+    <div id="settings-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
         <div class="bg-darkcard border border-darkcardborder w-full max-w-2xl rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
-            <!-- Header do Modal -->
-            <div class="px-6 py-5 border-b border-darkcardborder flex justify-between items-center bg-darkbg">
+            
+            <!-- Modal Header -->
+            <div class="p-5 bg-slate-900 border-b border-slate-800 flex items-center justify-between">
                 <div class="flex items-center space-x-3">
-                    <div class="p-2 bg-brand-500/10 text-brand-500 rounded-xl">
-                        <i class="fa-solid fa-sliders text-xl"></i>
-                    </div>
-                    <div>
-                        <h3 class="text-lg font-bold text-white">Ajustes & Configurações</h3>
-                        <p class="text-xs text-slate-400">Personalize o som, sinalização, salas e conexões</p>
-                    </div>
+                    <i class="fa-solid fa-sliders text-sky-400 text-xl"></i>
+                    <h3 class="font-extrabold text-lg text-white">Configurações do ChamaMed PRO</h3>
                 </div>
-                <button onclick="closeModal('settings-modal')" class="text-slate-400 hover:text-white p-2 rounded-xl hover:bg-slate-800 transition">
-                    <i class="fa-solid fa-xmark text-xl"></i>
+                <button onclick="closeSettingsModal()" class="text-slate-400 hover:text-white text-xl">
+                    <i class="fa-solid fa-xmark"></i>
                 </button>
             </div>
 
-            <!-- Corpo do Modal com Scroll -->
-            <div class="p-6 overflow-y-auto space-y-6 custom-scrollbar flex-grow">
+            <!-- Tabs de Configuração -->
+            <div class="p-6 overflow-y-auto space-y-6 flex-grow">
                 
-                <!-- Sessão 1: Áudio e Sinalização -->
-                <div class="space-y-4">
-                    <h4 class="text-xs font-bold uppercase tracking-wider text-brand-500 flex items-center space-x-2">
-                        <i class="fa-solid fa-volume-high"></i>
-                        <span>Sinalização Sonora & Voz</span>
-                    </h4>
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- GERENCIAMENTO DE SALAS -->
+                <div>
+                    <div class="flex items-center justify-between mb-3">
                         <div>
-                            <label class="block text-sm font-semibold text-slate-300 mb-2">Tipo de Sino de Chamada</label>
-                            <div class="flex space-x-2">
-                                <select id="setting-chime" class="w-full bg-darkbg border border-slate-700 text-white rounded-xl px-3 py-2.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-brand-500">
-                                    <option value="hospital">Ding-Dong Hospitalar</option>
-                                    <option value="sharp">Sino Agudo</option>
-                                    <option value="triple">Campainha Tripla</option>
-                                    <option value="soft">Tom Suave</option>
-                                </select>
-                                <button onclick="testCurrentChime()" class="bg-brand-600 hover:bg-brand-500 text-white px-3 py-2.5 rounded-xl text-sm font-bold transition flex items-center space-x-1 whitespace-nowrap">
-                                    <i class="fa-solid fa-play text-xs"></i>
-                                    <span>Testar</span>
-                                </button>
-                            </div>
+                            <h4 class="text-base font-bold text-white">Gerenciar Consultórios e Salas</h4>
+                            <p class="text-xs text-slate-400">Cadastre ou edite as salas do seu hospital/UBS (Mínimo de 15 padrão)</p>
+                        </div>
+                        <button onclick="addNewRoomPrompt()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs px-3.5 py-2 rounded-xl transition flex items-center space-x-1.5 shadow-md">
+                            <i class="fa-solid fa-plus"></i>
+                            <span>Nova Sala</span>
+                        </button>
+                    </div>
+
+                    <!-- Lista Editável de Salas -->
+                    <div id="rooms-editor-list" class="space-y-2 max-h-[260px] overflow-y-auto pr-1">
+                        <!-- Gerado Dinamicamente -->
+                    </div>
+                </div>
+
+                <!-- CONFIGURAÇÃO DE SÍNTESE DE VOZ E ÁUDIO -->
+                <div class="pt-4 border-t border-slate-800 space-y-4">
+                    <h4 class="text-base font-bold text-white">Voz e Sinal Sonoro</h4>
+                    
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-300 mb-1">Velocidade da Voz:</label>
+                            <input type="range" id="speech-rate" min="0.7" max="1.3" step="0.05" value="0.95" onchange="saveAudioSettings()" class="w-full accent-sky-500">
                         </div>
 
                         <div>
-                            <label class="block text-sm font-semibold text-slate-300 mb-2">Velocidade da Voz</label>
-                            <select id="setting-speech-rate" class="w-full bg-darkbg border border-slate-700 text-white rounded-xl px-3 py-2.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-brand-500">
-                                <option value="0.8">Lenta</option>
-                                <option value="0.95" selected>Normal</option>
-                                <option value="1.1">Rápida</option>
+                            <label class="block text-xs font-bold text-slate-300 mb-1">Tom do Sinal Sonoro (Chime):</label>
+                            <select id="chime-type-select" onchange="saveAudioSettings()" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-sm text-white focus:outline-none">
+                                <option value="hospital">Sino Hospitalar Tridimencional</option>
+                                <option value="modern">Gongo Duplo Suave</option>
+                                <option value="digital">Bip Eletrônico Clínico</option>
                             </select>
                         </div>
                     </div>
-                </div>
 
-                <!-- Sessão 2: Personalização e Logomarca -->
-                <div class="space-y-4 pt-4 border-t border-darkcardborder">
-                    <h4 class="text-xs font-bold uppercase tracking-wider text-brand-500 flex items-center space-x-2">
-                        <i class="fa-solid fa-image"></i>
-                        <span>Identidade Visual</span>
-                    </h4>
-
-                    <div>
-                        <label class="block text-sm font-semibold text-slate-300 mb-2">URL da Logomarca (Brasão/UBS)</label>
-                        <input type="text" id="setting-logo-url" placeholder="https://exemplo.com/logo-ubs.png" class="w-full bg-darkbg border border-slate-700 text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500">
-                        <p class="text-xs text-slate-500 mt-1">Cole o link direto da imagem PNG ou JPG da prefeitura ou unidade.</p>
-                    </div>
-                </div>
-
-                <!-- Sessão 3: Gerenciamento de Salas e Consultórios -->
-                <div class="space-y-4 pt-4 border-t border-darkcardborder">
-                    <div class="flex justify-between items-center">
-                        <h4 class="text-xs font-bold uppercase tracking-wider text-brand-500 flex items-center space-x-2">
-                            <i class="fa-solid fa-door-open"></i>
-                            <span>Gerenciar Salas & Consultórios (<span id="roomCountBadge">15</span>)</span>
-                        </h4>
-                        <button onclick="addNewRoomPrompt()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 shadow transition">
-                            <i class="fa-solid fa-plus"></i> Nova Sala
+                    <div class="flex space-x-2 pt-2">
+                        <button onclick="testCurrentChime()" class="bg-slate-800 hover:bg-slate-700 text-sky-400 border border-sky-500/30 text-xs font-bold px-3 py-2 rounded-xl flex items-center space-x-1">
+                            <i class="fa-solid fa-bell"></i>
+                            <span>Testar Som</span>
+                        </button>
+                        <button onclick="testCurrentVoice()" class="bg-slate-800 hover:bg-slate-700 text-emerald-400 border border-emerald-500/30 text-xs font-bold px-3 py-2 rounded-xl flex items-center space-x-1">
+                            <i class="fa-solid fa-comment-dots"></i>
+                            <span>Testar Voz Completa</span>
                         </button>
                     </div>
-                    <p class="text-xs text-slate-400">Personalize o nome da sala e a especialidade associada:</p>
-                    
-                    <div id="roomsListConfig" class="space-y-2 max-h-60 overflow-y-auto pr-1 custom-scrollbar">
-                        <!-- Gerado dinamicamente -->
-                    </div>
-                </div>
-
-                <!-- Sessão 4: Integração Firebase Realtime Database -->
-                <div class="space-y-4 pt-4 border-t border-darkcardborder">
-                    <div class="flex items-center justify-between">
-                        <h4 class="text-xs font-bold uppercase tracking-wider text-brand-500 flex items-center space-x-2">
-                            <i class="fa-solid fa-database"></i>
-                            <span>Conexão Firebase Realtime Database</span>
-                        </h4>
-                        <span class="text-xs bg-emerald-500/20 text-emerald-400 font-bold px-2 py-0.5 rounded-full">Ativo</span>
-                    </div>
-
-                    <p class="text-xs text-slate-400">O sistema utiliza o banco em tempo real para sincronizar a TV e os Consultórios instantaneamente.</p>
-
-                    <div class="space-y-3">
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-400 mb-1">Database URL</label>
-                            <input type="text" id="setting-fb-url" value="https://painel-chamada-a847a-default-rtdb.firebaseio.com" class="w-full bg-darkbg border border-slate-700 text-white rounded-xl px-3 py-2 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-brand-500">
-                        </div>
-                        <div class="grid grid-cols-2 gap-3">
-                            <div>
-                                <label class="block text-xs font-semibold text-slate-400 mb-1">API Key</label>
-                                <input type="password" id="setting-fb-key" value="AIzaSyC2I6G89Wb8xDTbN8vBEzYbthA-L_Sltw0" class="w-full bg-darkbg border border-slate-700 text-white rounded-xl px-3 py-2 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-brand-500">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-semibold text-slate-400 mb-1">Project ID</label>
-                                <input type="text" id="setting-fb-proj" value="painel-chamada-a847a" class="w-full bg-darkbg border border-slate-700 text-white rounded-xl px-3 py-2 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-brand-500">
-                            </div>
-                        </div>
-                    </div>
                 </div>
 
             </div>
 
-            <!-- Footer do Modal -->
-            <div class="px-6 py-4 bg-darkbg border-t border-darkcardborder flex justify-end space-x-3">
-                <button onclick="closeModal('settings-modal')" class="px-4 py-2.5 rounded-xl border border-slate-700 text-slate-300 hover:text-white hover:bg-slate-800 text-sm font-semibold transition">
-                    Cancelar
-                </button>
-                <button onclick="saveAllSettings()" class="px-5 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-sm font-bold transition shadow-md shadow-brand-600/30">
-                    Salvar Alterações
+            <!-- Modal Footer -->
+            <div class="p-4 bg-slate-900 border-t border-slate-800 flex justify-end">
+                <button onclick="closeSettingsModal()" class="bg-sky-600 hover:bg-sky-500 text-white font-extrabold text-sm px-6 py-2.5 rounded-xl transition">
+                    Concluir e Salvar
                 </button>
             </div>
+
         </div>
     </div>
 
+    <!-- RODAPÉ DA APLICAÇÃO -->
+    <footer class="bg-slate-950 border-t border-slate-900 py-3 text-center text-xs text-slate-500">
+        ChamaMed PRO &copy; 2026 - Sistema Inteligente para Recepção Hospitalar, Postos de Saúde e UBS.
+    </footer>
+
+    <!-- SCRIPT PRINCIPAL DO CHAMAMED PRO -->
     <script>
-    const appId = typeof __app_id !== 'undefined' ? __app_id : 'chamamed-pro-v1';
-    
-    // Lista inicial com 15 consultórios/salas
-    const DEFAULT_ROOMS = [
-      { id: 'sala-1', name: 'Sala 01', doctor: 'Dr. Jonathan Santos - Clínico' },
-      { id: 'sala-2', name: 'Sala 02', doctor: 'Dra. Ana Silva - Pediatria' },
-      { id: 'sala-3', name: 'Sala 03', doctor: 'Triagem / Enfermagem' },
-      { id: 'sala-4', name: 'Sala 04', doctor: 'Vacinação' },
-      { id: 'sala-5', name: 'Sala 05', doctor: 'Curativos / Procedimentos' },
-      { id: 'sala-6', name: 'Sala 06', doctor: 'Dra. Maria Oliveira - Ginecologia' },
-      { id: 'sala-7', name: 'Sala 07', doctor: 'Dr. Carlos Eduardo - Cardiologia' },
-      { id: 'sala-8', name: 'Sala 08', doctor: 'Psicologia' },
-      { id: 'sala-9', name: 'Sala 09', doctor: 'Odontologia - Consultório 1' },
-      { id: 'sala-10', name: 'Sala 10', doctor: 'Odontologia - Consultório 2' },
-      { id: 'sala-11', name: 'Sala 11', doctor: 'Fonoaudiologia' },
-      { id: 'sala-12', name: 'Sala 12', doctor: 'Nutrição' },
-      { id: 'sala-13', name: 'Sala 13', doctor: 'Serviço Social' },
-      { id: 'sala-14', name: 'Sala 14', doctor: 'Fisioterapia' },
-      { id: 'sala-15', name: 'Sala 15', doctor: 'Farmácia / Dispensação' }
-    ];
 
-    let activeTab = 'doctor';
-    let callQueue = [];
-    let isSpeaking = false;
-    let lastCalledCall = null;
-    let doctorHistory = [];
-    let tvHistory = [];
-    let firebaseApp = null;
-    let firebaseDb = null;
-    let callsRef = null;
+        // 15 SALAS INICIAIS PADRÃO DO SISTEMA
+        const DEFAULT_ROOMS = [
+            { id: 'room-1', name: 'Consultório 01', doctor: 'Dr. Jonathan Santos - Clínica Geral' },
+            { id: 'room-2', name: 'Consultório 02', doctor: 'Dra. Ana Silva - Pediatria' },
+            { id: 'room-3', name: 'Consultório 03', doctor: 'Enfa. Carla Lima - Triagem & Acolhimento' },
+            { id: 'room-4', name: 'Sala de Vacinas', doctor: 'Téc. Roberto Mendes - Imunização' },
+            { id: 'room-5', name: 'Sala de Curativos', doctor: 'Enf. Márcia Souza - Procedimentos' },
+            { id: 'room-6', name: 'Consultório 04', doctor: 'Dra. Fernanda Rocha - Ginecologia' },
+            { id: 'room-7', name: 'Consultório 05', doctor: 'Dr. Carlos Eduardo - Cardiologia' },
+            { id: 'room-8', name: 'Consultório 06', doctor: 'Dra. Patricia Alves - Psicologia' },
+            { id: 'room-9', name: 'Consultório Odontológico 1', doctor: 'Dr. Lucas Martins - Odontologia' },
+            { id: 'room-10', name: 'Consultório Odontológico 2', doctor: 'Dra. Camila Barbosa - Odontologia' },
+            { id: 'room-11', name: 'Sala de Fonoaudiologia', doctor: 'Dra. Beatriz Costa - Fonoaudiologia' },
+            { id: 'room-12', name: 'Sala de Nutrição', doctor: 'Dr. Gabriel Ribeiro - Nutrição' },
+            { id: 'room-13', name: 'Serviço Social', doctor: 'Assist. Juliana Lima - Serviço Social' },
+            { id: 'room-14', name: 'Sala de Fisioterapia', doctor: 'Dr. Ricardo Nunes - Fisioterapia' },
+            { id: 'room-15', name: 'Farmácia Central', doctor: 'Farm. Marcelo Prado - Dispensação' }
+        ];
 
-    let appConfig = {
-      doctorName: 'Dr. Jonathan Santos',
-      roomName: 'Sala 01',
-      roomId: 'sala-1',
-      chimeType: 'hospital',
-      speechRate: 0.95,
-      logoUrl: '',
-      firebaseUrl: 'https://painel-chamada-a847a-default-rtdb.firebaseio.com',
-      firebaseKey: 'AIzaSyC2I6G89Wb8xDTbN8vBEzYbthA-L_Sltw0',
-      firebaseProjectId: 'painel-chamada-a847a',
-      rooms: [...DEFAULT_ROOMS]
-    };
-
-    // Inicialização ao carregar
-    window.addEventListener('DOMContentLoaded', () => {
-        loadSavedConfig();
-        initFirebase();
-        startClock();
-        updateLogoDisplay();
-        renderRoomSelectOptions();
-        renderRoomsConfigList();
-    });
-
-    function escapeHtml(str) {
-        if (!str) return '';
-        return String(str)
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;')
-            .replace(/'/g, '&#039;');
-    }
-
-    function showToast(message, type = 'info') {
-        let container = document.getElementById('toast-container');
-        if (!container) {
-            container = document.createElement('div');
-            container.id = 'toast-container';
-            container.className = 'fixed bottom-5 right-5 z-50 flex flex-col space-y-2';
-            document.body.appendChild(container);
-        }
-        const toast = document.createElement('div');
-        const colors = {
-            success: 'bg-emerald-600 border-emerald-500',
-            warning: 'bg-amber-600 border-amber-500',
-            info: 'bg-brand-600 border-brand-500',
-            error: 'bg-rose-600 border-rose-500'
+        // Estado da Aplicação
+        let appConfig = {
+            doctorName: 'Dr. Jonathan Santos - Clínica Geral',
+            roomId: 'room-1',
+            speechRate: 0.95,
+            chimeType: 'hospital',
+            rooms: [...DEFAULT_ROOMS]
         };
-        toast.className = `text-white px-4 py-3 rounded-xl border shadow-xl flex items-center space-x-2 text-sm font-semibold transition-all duration-300 transform translate-y-2 opacity-0 ${colors[type] || colors.info}`;
-        toast.innerHTML = `<span>${escapeHtml(message)}</span>`;
-        container.appendChild(toast);
-        
-        setTimeout(() => {
-            toast.classList.remove('translate-y-2', 'opacity-0');
-        }, 10);
-        
-        setTimeout(() => {
-            toast.classList.add('opacity-0', 'translate-y-2');
-            setTimeout(() => toast.remove(), 300);
-        }, 3000);
-    }
 
-    // Alternador de Abas
-    function switchTab(tab) {
-        activeTab = tab;
-        const docView = document.getElementById('view-doctor');
-        const tvView = document.getElementById('view-tv');
-        const btnDoc = document.getElementById('btn-tab-doctor');
-        const btnTv = document.getElementById('btn-tab-tv');
+        let callHistory = [];
+        let currentCall = null;
+        let audioCtx = null;
 
-        if (tab === 'doctor') {
-            docView.classList.remove('hidden');
-            tvView.classList.add('hidden');
+        // Inicialização
+        window.addEventListener('DOMContentLoaded', () => {
+            loadStoredConfig();
+            initClock();
+            renderRoomSelectOptions();
+            onRoomSelectChange();
+            updateHistoryUI();
+        });
 
-            btnDoc.className = "flex items-center space-x-2 px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-200 bg-brand-600 text-white shadow-md shadow-brand-600/30";
-            btnTv.className = "flex items-center space-x-2 px-4 py-2 rounded-lg font-semibold text-sm text-slate-400 hover:text-white transition-all duration-200";
-        } else {
-            docView.classList.add('hidden');
-            tvView.classList.remove('hidden');
-
-            btnTv.className = "flex items-center space-x-2 px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-200 bg-brand-600 text-white shadow-md shadow-brand-600/30";
-            btnDoc.className = "flex items-center space-x-2 px-4 py-2 rounded-lg font-semibold text-sm text-slate-400 hover:text-white transition-all duration-200";
-
-            // Desbloqueia a síntese de voz com uma interação silenciosa ao alternar para a TV
-            if ('speechSynthesis' in window) {
-                window.speechSynthesis.speak(new SpeechSynthesisUtterance(''));
-            }
-        }
-    }
-
-    // Inicialização do Firebase Realtime Database
-    function initFirebase() {
-        try {
-            const config = {
-                apiKey: appConfig.firebaseKey,
-                databaseURL: appConfig.firebaseUrl,
-                projectId: appConfig.firebaseProjectId,
-            };
-
-            if (!firebase.apps.length) {
-                firebaseApp = firebase.initializeApp(config);
-            } else {
-                firebaseApp = firebase.app();
-            }
-
-            firebaseDb = firebase.database();
-            callsRef = firebaseDb.ref('calls');
-
-            document.getElementById('firebase-status-badge').innerHTML = `
-                <span class="h-2.5 w-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                <span class="text-sm font-bold text-slate-200">Firebase Online</span>
-            `;
-            document.getElementById('firebase-status-desc').innerText = "Sincronizado em Tempo Real";
-
-            // Escutar por chamadas no Firebase
-            callsRef.limitToLast(1).on('child_added', (snapshot) => {
-                const data = snapshot.val();
-                if (data && data.timestamp_ms > (Date.now() - 10000)) {
-                    callQueue.push(data);
-                    processQueue();
+        // Carregar configurações salvas
+        function loadStoredConfig() {
+            const saved = localStorage.getItem('chamamed_config');
+            if (saved) {
+                try {
+                    const parsed = JSON.parse(saved);
+                    if (parsed.rooms && parsed.rooms.length > 0) {
+                        appConfig.rooms = parsed.rooms;
+                    }
+                    if (parsed.doctorName) appConfig.doctorName = parsed.doctorName;
+                    if (parsed.roomId) appConfig.roomId = parsed.roomId;
+                    if (parsed.speechRate) appConfig.speechRate = parsed.speechRate;
+                    if (parsed.chimeType) appConfig.chimeType = parsed.chimeType;
+                } catch(e) {
+                    console.error("Erro ao carregar configurações", e);
                 }
+            }
+        }
+
+        function saveConfig() {
+            localStorage.setItem('chamamed_config', JSON.stringify(appConfig));
+        }
+
+        // Relógio
+        function initClock() {
+            function update() {
+                const now = new Date();
+                document.getElementById('clock-time').textContent = now.toLocaleTimeString('pt-BR');
+                document.getElementById('clock-date').textContent = now.toLocaleDateString('pt-BR');
+            }
+            update();
+            setInterval(update, 1000);
+        }
+
+        // Alternar Visão (Profissional vs TV)
+        function switchView(view) {
+            const btnDoc = document.getElementById('btn-view-doctor');
+            const btnTv = document.getElementById('btn-view-tv');
+            const panelDoc = document.getElementById('view-doctor-panel');
+            const panelTv = document.getElementById('view-tv-panel');
+
+            if (view === 'doctor') {
+                btnDoc.className = 'px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-200 bg-sky-600 text-white shadow-md flex items-center space-x-2';
+                btnTv.className = 'px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-200 text-slate-400 hover:text-white flex items-center space-x-2';
+                panelDoc.classList.remove('hidden');
+                panelTv.classList.add('hidden');
+            } else {
+                btnTv.className = 'px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-200 bg-sky-600 text-white shadow-md flex items-center space-x-2';
+                btnDoc.className = 'px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-200 text-slate-400 hover:text-white flex items-center space-x-2';
+                panelTv.classList.remove('hidden');
+                panelDoc.classList.add('hidden');
+            }
+        }
+
+
+        // Renderizar Dropdown de Salas
+        function renderRoomSelectOptions() {
+            const select = document.getElementById('doc-room-select');
+            select.innerHTML = '';
+            appConfig.rooms.forEach(room => {
+                const opt = document.createElement('option');
+                opt.value = room.id;
+                opt.textContent = `${room.name} (${room.doctor || 'Sem Profissional'})`;
+                if (room.id === appConfig.roomId) opt.selected = true;
+                select.appendChild(opt);
             });
-
-        } catch (err) {
-            console.warn("Executando em modo Local de Fallback (sem Firebase ativo):", err);
-            document.getElementById('firebase-status-badge').innerHTML = `
-                <span class="h-2.5 w-2.5 rounded-full bg-amber-500"></span>
-                <span class="text-sm font-bold text-slate-200">Local (Browser)</span>
-            `;
-            document.getElementById('firebase-status-desc').innerText = "Modo de simulação ativo";
         }
-    }
 
-    function renderRoomSelectOptions() {
-        const select = document.getElementById('doc-room-select');
-        if (!select) return;
-        select.innerHTML = appConfig.rooms.map(room => `
-            <option value="${room.id}" ${room.id === appConfig.roomId ? 'selected' : ''}>
-                ${escapeHtml(room.name)} - ${escapeHtml(room.doctor)}
-            </option>
-        `).join('');
-    }
-
-    function renderRoomsConfigList() {
-        const container = document.getElementById('roomsListConfig');
-        const badge = document.getElementById('roomCountBadge');
-        if (badge) badge.textContent = appConfig.rooms.length;
-        if (!container) return;
-
-        container.innerHTML = appConfig.rooms.map((room, index) => `
-            <div class="flex flex-wrap sm:flex-nowrap gap-2 items-center bg-darkbg p-2.5 rounded-xl border border-slate-800">
-                <span class="text-xs font-mono text-slate-500 w-6 font-bold text-center">${index + 1}</span>
-                <input type="text" value="${escapeHtml(room.name)}" onchange="updateRoomField('${room.id}', 'name', this.value)" 
-                    class="bg-darkcard border border-slate-700 text-white rounded-lg px-2.5 py-1.5 text-xs w-full sm:w-1/3 focus:border-brand-500 focus:outline-none" placeholder="Ex: Sala 01">
-                <input type="text" value="${escapeHtml(room.doctor)}" onchange="updateRoomField('${room.id}', 'doctor', this.value)" 
-                    class="bg-darkcard border border-slate-700 text-slate-200 rounded-lg px-2.5 py-1.5 text-xs w-full sm:w-1/2 focus:border-brand-500 focus:outline-none" placeholder="Ex: Dr. Silva">
-                <button onclick="removeRoom('${room.id}')" class="text-rose-400 hover:text-rose-300 hover:bg-rose-950/50 p-1.5 rounded-lg transition ml-auto" title="Remover Sala">
-                    <i class="fa-solid fa-trash-can text-xs"></i>
-                </button>
-            </div>
-        `).join('');
-    }
-
-    function addNewRoomPrompt() {
-        const nextNum = appConfig.rooms.length + 1;
-        const newRoom = {
-            id: 'sala-' + Date.now(),
-            name: `Sala ${nextNum < 10 ? '0' + nextNum : nextNum}`,
-            doctor: 'Clínico Geral / Consultório'
-        };
-        appConfig.rooms.push(newRoom);
-        saveDoctorSettings();
-        renderRoomSelectOptions();
-        renderRoomsConfigList();
-        showToast(`Nova sala "${newRoom.name}" adicionada!`, 'success');
-    }
-
-    function removeRoom(roomId) {
-        if (appConfig.rooms.length <= 1) {
-            showToast('O sistema necessita de ao menos 01 sala.', 'warning');
-            return;
+        // Ao alterar a Sala no Seletor Principal
+        function onRoomSelectChange() {
+            const select = document.getElementById('doc-room-select');
+            appConfig.roomId = select.value;
+            const selectedRoomObj = appConfig.rooms.find(r => r.id === appConfig.roomId);
+            
+            if (selectedRoomObj) {
+                document.getElementById('doc-name-input').value = selectedRoomObj.doctor || '';
+                appConfig.doctorName = selectedRoomObj.doctor || '';
+            }
+            saveConfig();
+            updateHistoryUI();
         }
-        appConfig.rooms = appConfig.rooms.filter(r => r.id !== roomId);
-        if (appConfig.roomId === roomId) {
-            appConfig.roomId = appConfig.rooms[0].id;
-        }
-        saveDoctorSettings();
-        renderRoomSelectOptions();
-        renderRoomsConfigList();
-        showToast('Sala removida com sucesso.', 'info');
-    }
 
-    function updateRoomField(roomId, field, value) {
-        const room = appConfig.rooms.find(r => r.id === roomId);
-        if (room) {
-            room[field] = value;
-            saveDoctorSettings();
+        function saveDoctorSettings() {
+            appConfig.doctorName = document.getElementById('doc-name-input').value.trim();
+            const currentRoom = appConfig.rooms.find(r => r.id === appConfig.roomId);
+            if (currentRoom) {
+                currentRoom.doctor = appConfig.doctorName;
+            }
+            saveConfig();
             renderRoomSelectOptions();
         }
-    }
 
-    // Disparar Chamada
-    function triggerCall() {
-        const input = document.getElementById('input-patient');
-        const patientName = input.value.trim();
 
-        if (!patientName) {
-            input.focus();
-            input.classList.add('ring-2', 'ring-red-500');
-            setTimeout(() => input.classList.remove('ring-2', 'ring-red-500'), 1500);
-            return;
-        }
+        // Efeito Sonoro (Chime Hospitalar via Web Audio API)
+        function playChimeSound(onEnded) {
+            try {
+                if (!audioCtx) {
+                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
 
-        const docName = document.getElementById('doc-name-input').value.trim() || appConfig.doctorName;
-        const selectedRoomObj = appConfig.rooms.find(r => r.id === document.getElementById('doc-room-select').value) || { name: appConfig.roomName, doctor: docName };
-        const isPreferential = document.getElementById('check-preferential').checked;
-        const repeats = parseInt(document.getElementById('select-repeats').value) || 2;
-
-        const callData = {
-            id: 'call_' + Date.now(),
-            patientName: patientName,
-            doctorName: docName || selectedRoomObj.doctor,
-            roomName: selectedRoomObj.name,
-            isPreferential: isPreferential,
-            repeats: repeats,
-            chimeType: appConfig.chimeType,
-            speechRate: appConfig.speechRate,
-            timestamp: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
-            timestamp_ms: Date.now()
-        };
-
-        lastCalledCall = callData;
-        document.getElementById('btn-recall').disabled = false;
-
-        // Enviar para Firebase se disponível
-        if (callsRef) {
-            callsRef.push(callData);
-        } else {
-            // Adicionar diretamente à fila em simulação local
-            callQueue.push(callData);
-            processQueue();
-        }
-
-        // Registrar no histórico do Médico
-        addDoctorHistory(callData);
-
-        // Limpar Input
-        input.value = '';
-        document.getElementById('check-preferential').checked = false;
-        showToast(`Chamada emitida: ${callData.patientName}`, 'success');
-    }
-
-    // Rechamar Último
-    function recallLast() {
-        if (lastCalledCall) {
-            document.getElementById('input-patient').value = lastCalledCall.patientName;
-            document.getElementById('check-preferential').checked = lastCalledCall.isPreferential;
-            triggerCall();
-        }
-    }
-
-    function clearPatientInput() {
-        document.getElementById('input-patient').value = '';
-        document.getElementById('input-patient').focus();
-    }
-
-    // Processamento de Fila da TV
-    function processQueue() {
-        if (isSpeaking || callQueue.length === 0) return;
-        isSpeaking = true;
-
-        const currentCall = callQueue.shift();
-
-        // Atualizar Card Principal da TV
-        document.getElementById('tv-patient-display').innerText = currentCall.patientName.toUpperCase();
-        document.getElementById('tv-room-display').innerText = currentCall.roomName;
-        document.getElementById('tv-doctor-display').innerText = currentCall.doctorName;
-
-        const prefBadge = document.getElementById('tv-preferential-badge');
-        if (currentCall.isPreferential) {
-            prefBadge.classList.remove('hidden');
-        } else {
-            prefBadge.classList.add('hidden');
-        }
-
-        const mainCard = document.getElementById('tv-main-card');
-        mainCard.classList.add('animate-glow');
-
-        // Reproduzir Sino
-        playChimeSound(currentCall.chimeType || appConfig.chimeType);
-
-        // Tocar Voz após o sino
-        setTimeout(() => {
-            speakPatientCall(currentCall, () => {
-                mainCard.classList.remove('animate-glow');
-                addTvHistory(currentCall);
-                isSpeaking = false;
-                processQueue();
-            });
-        }, 1200);
-    }
-
-    // Síntese de Áudio - Sinos
-    function testCurrentChime() {
-        const chimeType = document.getElementById('setting-chime').value;
-        playChimeSound(chimeType);
-    }
-
-    function playChimeSound(type) {
-        try {
-            const AudioCtx = window.AudioContext || window.webkitAudioContext;
-            if (!AudioCtx) return;
-            const ctx = new AudioCtx();
-
-            if (type === 'hospital') {
-                playTone(ctx, 523.25, 0, 0.4); // C5
-                playTone(ctx, 659.25, 0.3, 0.6); // E5
-            } else if (type === 'sharp') {
-                playTone(ctx, 880, 0, 0.25); // A5
-                playTone(ctx, 1046.50, 0.2, 0.5); // C6
-            } else if (type === 'triple') {
-                playTone(ctx, 440, 0, 0.2);
-                playTone(ctx, 554.37, 0.18, 0.2);
-                playTone(ctx, 659.25, 0.36, 0.5);
-            } else if (type === 'soft') {
-                playTone(ctx, 329.63, 0, 0.5);
-                playTone(ctx, 392.00, 0.25, 0.6);
+                const now = audioCtx.currentTime;
+                
+                if (appConfig.chimeType === 'hospital') {
+                    // Notas hospitalares harmoniosas (G4, C5, E5)
+                    const frequencies = [392.00, 523.25, 659.25];
+                    frequencies.forEach((freq, idx) => {
+                        const osc = audioCtx.createOscillator();
+                        const gain = audioCtx.createGain();
+                        
+                        osc.type = 'sine';
+                        osc.frequency.setValueAtTime(freq, now + (idx * 0.18));
+                        
+                        gain.gain.setValueAtTime(0, now + (idx * 0.18));
+                        gain.gain.linearRampToValueAtTime(0.3, now + (idx * 0.18) + 0.05);
+                        gain.gain.exponentialRampToValueAtTime(0.001, now + (idx * 0.18) + 1.2);
+                        
+                        osc.connect(gain);
+                        gain.connect(audioCtx.destination);
+                        
+                        osc.start(now + (idx * 0.18));
+                        osc.stop(now + (idx * 0.18) + 1.3);
+                    });
+                    setTimeout(onEnded, 1200);
+                } else if (appConfig.chimeType === 'modern') {
+                    // Gongo duplo suave
+                    [523.25, 659.25].forEach((freq, idx) => {
+                        const osc = audioCtx.createOscillator();
+                        const gain = audioCtx.createGain();
+                        osc.type = 'triangle';
+                        osc.frequency.setValueAtTime(freq, now + (idx * 0.25));
+                        gain.gain.setValueAtTime(0.3, now + (idx * 0.25));
+                        gain.gain.exponentialRampToValueAtTime(0.001, now + (idx * 0.25) + 1.0);
+                        osc.connect(gain);
+                        gain.connect(audioCtx.destination);
+                        osc.start(now + (idx * 0.25));
+                        osc.stop(now + (idx * 0.25) + 1.1);
+                    });
+                    setTimeout(onEnded, 900);
+                } else {
+                    // Bip Clínico
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(880, now);
+                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start(now);
+                    osc.stop(now + 0.45);
+                    setTimeout(onEnded, 500);
+                }
+            } catch(e) {
+                console.log("Audio API não permitida ou erro no som:", e);
+                setTimeout(onEnded, 500);
             }
-        } catch (e) {
-            console.error("Erro ao tocar áudio WebAudio:", e);
-        }
-    }
-
-    function playTone(ctx, freq, startTime, duration) {
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.frequency.setValueAtTime(freq, ctx.currentTime + startTime);
-        gain.gain.setValueAtTime(0.3, ctx.currentTime + startTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + startTime + duration);
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        osc.start(ctx.currentTime + startTime);
-        osc.stop(ctx.currentTime + startTime + duration);
-    }
-
-    // Síntese de Voz (Speech Synthesis)
-    function speakPatientCall(call, onComplete) {
-        if (!('speechSynthesis' in window)) {
-            setTimeout(onComplete, 3000);
-            return;
         }
 
-        window.speechSynthesis.cancel();
 
-        let phrase = `Atenção: Paciente, ${call.patientName}. Dirigir-se ao ${call.roomName}.`;
-        if (call.isPreferential) {
-            phrase = `Atenção: Paciente preferencial, ${call.patientName}. Dirigir-se ao ${call.roomName}.`;
+        // SÍNTESE DE VOZ - FALA PACIENTE, SALA E MÉDICO/PROCEDIMENTO
+        function speakPatientCall(call, onComplete) {
+            if (!('speechSynthesis' in window)) {
+                setTimeout(onComplete, 2500);
+                return;
+            }
+
+            window.speechSynthesis.cancel();
+
+            let destination = call.roomName;
+            
+            // Tratamento da fala do médico / especialidade
+            if (call.doctorName) {
+                // Substitui traços e barras por vírgula para pausa natural na fala
+                const cleanDoctor = call.doctorName.replace(/[-/]/g, ', ');
+                destination += `, ${cleanDoctor}`;
+            }
+
+            // Construção da frase completa enunciada pelo sistema
+            let phrase = `Atenção: Paciente, ${call.patientName}. Dirigir-se à ${destination}.`;
+            
+            if (call.isPreferential) {
+                phrase = `Atenção: Paciente preferencial, ${call.patientName}. Dirigir-se à ${destination}.`;
+            }
+
+            const utterance = new SpeechSynthesisUtterance(phrase);
+            utterance.lang = 'pt-BR';
+            utterance.rate = parseFloat(call.speechRate || appConfig.speechRate || 0.95);
+
+            utterance.onend = onComplete;
+            utterance.onerror = onComplete;
+
+            window.speechSynthesis.speak(utterance);
         }
 
-        if (call.repeats > 1) {
-            phrase += ` Repetindo: Paciente, ${call.patientName}. ${call.roomName}.`;
+
+        // Efetuar Chamada de Paciente
+        function triggerCall(isRecall = false, patientOverride = null) {
+            const inputField = document.getElementById('patient-name-input');
+            const name = patientOverride || inputField.value.trim();
+
+            if (!name && !isRecall) {
+                alert('Por favor, informe o nome do paciente para efetuar a chamada.');
+                inputField.focus();
+                return;
+            }
+
+            const activeRoom = appConfig.rooms.find(r => r.id === appConfig.roomId) || appConfig.rooms[0];
+            const isPreferential = document.getElementById('preferential-check').checked;
+            const repeatCount = parseInt(document.getElementById('repeat-count').value) || 1;
+
+            const callData = {
+                id: Date.now(),
+                patientName: name || (currentCall ? currentCall.patientName : 'Paciente'),
+                roomId: activeRoom.id,
+                roomName: activeRoom.name,
+                doctorName: document.getElementById('doc-name-input').value.trim() || activeRoom.doctor,
+                isPreferential: isPreferential,
+                repeats: repeatCount,
+                time: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+            };
+
+            currentCall = callData;
+            
+            // Adicionar ao histórico se não for uma simples rechamada
+            if (!isRecall || !callHistory.some(c => c.id === callData.id)) {
+                callHistory.unshift(callData);
+            }
+
+            updateHistoryUI();
+            updateTVPanelUI(callData);
+
+            // Tocar som + falar o nome completo + sala + médico
+            playCallSequence(callData, repeatCount);
+
+            if (!isRecall) {
+                inputField.value = '';
+            }
         }
 
-        const utterance = new SpeechSynthesisUtterance(phrase);
-        utterance.lang = 'pt-BR';
-        utterance.rate = parseFloat(call.speechRate || appConfig.speechRate || 0.95);
+        function triggerRecall() {
+            if (!currentCall) {
+                alert('Nenhuma chamada anterior foi efetuada para rechamar.');
+                return;
+            }
+            triggerCall(true, currentCall.patientName);
+        }
 
-        utterance.onend = onComplete;
-        utterance.onerror = onComplete;
+        // Executar sequência de aviso sonoro e repetição de voz
+        function playCallSequence(callData, remaining) {
+            if (remaining <= 0) return;
 
-        window.speechSynthesis.speak(utterance);
-    }
+            playChimeSound(() => {
+                speakPatientCall(callData, () => {
+                    if (remaining > 1) {
+                        setTimeout(() => {
+                            playCallSequence(callData, remaining - 1);
+                        }, 1000);
+                    }
+                });
+            });
+        }
 
-    // Histórico do Doutor
-    function addDoctorHistory(call) {
-        doctorHistory.unshift(call);
-        if (doctorHistory.length > 8) doctorHistory.pop();
+        // Atualizar Painel da TV
+        function updateTVPanelUI(call) {
+            const nameEl = document.getElementById('tv-patient-name');
+            const roomEl = document.getElementById('tv-room-name');
+            const docEl = document.getElementById('tv-doctor-name');
+            const badgeEl = document.getElementById('tv-badge-status');
+            const cardEl = document.getElementById('tv-main-card');
 
-        const container = document.getElementById('doctor-history-list');
-        if (container) {
-            container.innerHTML = doctorHistory.map(item => `
-                <div class="flex justify-between items-center bg-darkbg p-3.5 rounded-2xl border border-slate-800 text-sm">
-                    <div>
-                        <span class="font-bold text-slate-100">${escapeHtml(item.patientName)}</span>
-                        ${item.isPreferential ? '<span class="ml-2 text-xs bg-amber-500/20 text-amber-400 font-bold px-2 py-0.5 rounded-full">PREFERENCIAL</span>' : ''}
-                        <p class="text-xs text-slate-400">${escapeHtml(item.roomName)} - ${escapeHtml(item.doctorName)}</p>
+            nameEl.textContent = call.patientName;
+            roomEl.textContent = call.roomName;
+            docEl.textContent = call.doctorName || 'Atendimento Geral';
+
+            if (call.isPreferential) {
+                badgeEl.textContent = '★ PREFERENCIAL';
+                badgeEl.className = 'bg-amber-500/20 text-amber-400 border border-amber-500/30 text-xs px-3 py-1 rounded-full font-bold uppercase tracking-wider';
+            } else {
+                badgeEl.textContent = 'CHAMADA ATIVA';
+                badgeEl.className = 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-xs px-3 py-1 rounded-full font-bold uppercase tracking-wider';
+            }
+
+            // Animação de piscar para chamar atenção na TV
+            cardEl.classList.add('blink-call');
+            setTimeout(() => {
+                cardEl.classList.remove('blink-call');
+            }, 5000);
+        }
+
+        // Atualizar Histórico de Chamadas na UI
+        function updateHistoryUI() {
+            // Histórico do Consultório Atual
+            const docList = document.getElementById('doc-history-list');
+            const roomCalls = callHistory.filter(c => c.roomId === appConfig.roomId);
+
+            if (roomCalls.length === 0) {
+                docList.innerHTML = `<div class="text-center text-slate-500 py-10 text-sm">Nenhum paciente chamado nesta sala ainda.</div>`;
+            } else {
+                docList.innerHTML = roomCalls.map(c => `
+                    <div onclick="triggerCall(true, '${c.patientName}')" class="bg-slate-900/90 border border-slate-800 hover:border-sky-500/50 p-3 rounded-2xl flex items-center justify-between cursor-pointer transition">
+                        <div class="flex items-center space-x-3">
+                            <div class="p-2 ${c.isPreferential ? 'bg-amber-500/10 text-amber-400' : 'bg-sky-500/10 text-sky-400'} rounded-xl text-sm font-bold">
+                                <i class="fa-solid ${c.isPreferential ? 'fa-wheelchair' : 'fa-user'}"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-sm text-white">${c.patientName}</h4>
+                                <span class="text-xs text-slate-400">${c.time} ${c.isPreferential ? '• Preferencial' : ''}</span>
+                            </div>
+                        </div>
+                        <span class="text-xs text-sky-400 font-bold bg-sky-500/10 px-2.5 py-1 rounded-lg">Rechamar</span>
                     </div>
-                    <div class="flex items-center space-x-2">
-                        <span class="text-xs font-mono text-slate-500">${item.timestamp}</span>
-                        <button onclick="reCallFromHistory('${escapeHtml(item.patientName)}', ${item.isPreferential})" class="text-brand-500 hover:text-brand-400 p-2 rounded-xl hover:bg-slate-800 transition" title="Rechamar">
-                            <i class="fa-solid fa-rotate-right"></i>
+                `).join('');
+            }
+
+            // Histórico Geral na TV
+            const tvGrid = document.getElementById('tv-history-grid');
+            if (callHistory.length === 0) {
+                tvGrid.innerHTML = `
+                    <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 text-center text-slate-500 text-sm">Aguardando...</div>
+                    <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 text-center text-slate-500 text-sm">Aguardando...</div>
+                    <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 text-center text-slate-500 text-sm">Aguardando...</div>
+                    <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 text-center text-slate-500 text-sm">Aguardando...</div>
+                `;
+            } else {
+                tvGrid.innerHTML = callHistory.slice(0, 4).map(c => `
+                    <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 flex flex-col justify-between">
+                        <div>
+                            <span class="text-[10px] uppercase font-extrabold ${c.isPreferential ? 'text-amber-400' : 'text-slate-400'}">${c.time} - ${c.roomName}</span>
+                            <h4 class="font-extrabold text-white text-base truncate mt-0.5">${c.patientName}</h4>
+                        </div>
+                        <p class="text-xs text-sky-300 font-medium truncate mt-2 border-t border-slate-800/80 pt-1.5">${c.doctorName || 'Atendimento'}</p>
+                    </div>
+                `).join('');
+            }
+        }
+
+        function clearCurrentRoomHistory() {
+            callHistory = callHistory.filter(c => c.roomId !== appConfig.roomId);
+            updateHistoryUI();
+        }
+
+
+        // MODAL DE CONFIGURAÇÕES & GERENCIAMENTO DE SALAS
+        function openSettingsModal() {
+            renderRoomsEditorList();
+            document.getElementById('speech-rate').value = appConfig.speechRate;
+            document.getElementById('chime-type-select').value = appConfig.chimeType;
+            document.getElementById('settings-modal').classList.remove('hidden');
+        }
+
+        function closeSettingsModal() {
+            document.getElementById('settings-modal').classList.add('hidden');
+            renderRoomSelectOptions();
+            onRoomSelectChange();
+        }
+
+        // Renderizar Lista de Edição de Salas no Modal
+        function renderRoomsEditorList() {
+            const container = document.getElementById('rooms-editor-list');
+            container.innerHTML = appConfig.rooms.map((room, index) => `
+                <div class="bg-slate-900 border border-slate-800 p-3 rounded-2xl flex items-center justify-between gap-3">
+                    <div class="flex-grow grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        <input type="text" value="${room.name}" onchange="updateRoomField('${room.id}', 'name', this.value)" class="bg-slate-800 border border-slate-700 text-white font-bold text-xs rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-sky-500" placeholder="Nome da Sala">
+                        <input type="text" value="${room.doctor || ''}" onchange="updateRoomField('${room.id}', 'doctor', this.value)" class="bg-slate-800 border border-slate-700 text-slate-200 text-xs rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-sky-500" placeholder="Médico / Especialidade">
+                    </div>
+                    ${appConfig.rooms.length > 1 ? `
+                        <button onclick="removeRoom('${room.id}')" class="text-slate-500 hover:text-red-400 p-2 text-sm transition" title="Remover Sala">
+                            <i class="fa-solid fa-trash-can"></i>
                         </button>
-                    </div>
+                    ` : ''}
                 </div>
             `).join('');
         }
-        const countElem = document.getElementById('history-count');
-        if (countElem) countElem.innerText = `${doctorHistory.length} chamadas`;
-    }
 
-    function reCallFromHistory(name, pref) {
-        document.getElementById('input-patient').value = name;
-        document.getElementById('check-preferential').checked = pref;
-        triggerCall();
-    }
-
-    // Histórico da TV
-    function addTvHistory(call) {
-        tvHistory.unshift(call);
-        if (tvHistory.length > 4) tvHistory.pop();
-
-        const container = document.getElementById('tv-history-grid');
-        if (!container) return;
-        container.innerHTML = tvHistory.map(item => `
-            <div class="bg-darkcard border border-darkcardborder p-4 rounded-2xl text-center shadow-md">
-                <span class="text-xs font-mono font-bold text-amber-500 block mb-1">${item.timestamp}</span>
-                <div class="font-black text-slate-100 text-sm truncate">${escapeHtml(item.patientName)}</div>
-                <div class="text-xs font-semibold text-emerald-400 truncate mt-0.5">${escapeHtml(item.roomName)}</div>
-            </div>
-        `).join('');
-    }
-
-    // Salvar e Carregar Configurações
-    function saveDoctorSettings() {
-        appConfig.doctorName = document.getElementById('doc-name-input').value.trim();
-        const selRoom = document.getElementById('doc-room-select');
-        if (selRoom) appConfig.roomId = selRoom.value;
-        localStorage.setItem('chamamed_config', JSON.stringify(appConfig));
-    }
-
-    function saveAllSettings() {
-        appConfig.chimeType = document.getElementById('setting-chime').value;
-        appConfig.speechRate = parseFloat(document.getElementById('setting-speech-rate').value);
-        appConfig.logoUrl = document.getElementById('setting-logo-url').value.trim();
-
-        appConfig.firebaseUrl = document.getElementById('setting-fb-url').value.trim();
-        appConfig.firebaseKey = document.getElementById('setting-fb-key').value.trim();
-        appConfig.firebaseProjectId = document.getElementById('setting-fb-proj').value.trim();
-
-        localStorage.setItem('chamamed_config', JSON.stringify(appConfig));
-
-        updateLogoDisplay();
-        initFirebase();
-        closeModal('settings-modal');
-        showToast('Configurações salvas com sucesso!', 'success');
-    }
-
-    function loadSavedConfig() {
-        const saved = localStorage.getItem('chamamed_config');
-        if (saved) {
-            try {
-                appConfig = { ...appConfig, ...JSON.parse(saved) };
-            } catch(e){}
-        }
-
-        document.getElementById('doc-name-input').value = appConfig.doctorName;
-        document.getElementById('setting-chime').value = appConfig.chimeType;
-        document.getElementById('setting-speech-rate').value = appConfig.speechRate;
-        document.getElementById('setting-logo-url').value = appConfig.logoUrl;
-
-        document.getElementById('setting-fb-url').value = appConfig.firebaseUrl;
-        document.getElementById('setting-fb-key').value = appConfig.firebaseKey;
-        document.getElementById('setting-fb-proj').value = appConfig.firebaseProjectId;
-    }
-
-    function updateLogoDisplay() {
-        const logoImgApp = document.getElementById('app-logo-img');
-        const logoIconApp = document.getElementById('app-logo-icon');
-        const logoImgTv = document.getElementById('tv-logo-img');
-        const logoIconTv = document.getElementById('tv-logo-icon');
-
-        if (appConfig.logoUrl) {
-            logoImgApp.src = appConfig.logoUrl;
-            logoImgApp.classList.remove('hidden');
-            logoIconApp.classList.add('hidden');
-
-            logoImgTv.src = appConfig.logoUrl;
-            logoImgTv.classList.remove('hidden');
-            logoIconTv.classList.add('hidden');
-        } else {
-            logoImgApp.classList.add('hidden');
-            logoIconApp.classList.remove('hidden');
-
-            logoImgTv.classList.add('hidden');
-            logoIconTv.classList.remove('hidden');
-        }
-    }
-
-    // Relógio da TV
-    function startClock() {
-        function update() {
-            const now = new Date();
-            document.getElementById('tv-clock').innerText = now.toLocaleTimeString('pt-BR');
-            const options = { weekday: 'long', day: 'numeric', month: 'long' };
-            document.getElementById('tv-date').innerText = now.toLocaleDateString('pt-BR', options);
-        }
-        update();
-        setInterval(update, 1000);
-    }
-
-    // Controles de Modal e Fullscreen
-    function openModal(id) {
-        document.getElementById(id).classList.remove('hidden');
-    }
-
-    function closeModal(id) {
-        document.getElementById(id).classList.add('hidden');
-    }
-
-    function toggleFullscreen() {
-        if (!document.fullscreenElement) {
-            document.documentElement.requestFullscreen().catch(() => {});
-        } else {
-            if (document.exitFullscreen) {
-                document.exitFullscreen();
+        function updateRoomField(roomId, field, value) {
+            const room = appConfig.rooms.find(r => r.id === roomId);
+            if (room) {
+                room[field] = value.trim();
+                saveConfig();
             }
         }
-    }
+
+        // Adicionar Nova Sala Ilimitada
+        function addNewRoomPrompt() {
+            const nextNum = appConfig.rooms.length + 1;
+            const newRoom = {
+                id: 'room-' + Date.now(),
+                name: `Consultório ${nextNum < 10 ? '0' + nextNum : nextNum}`,
+                doctor: 'Novo Médico / Especialidade'
+            };
+            appConfig.rooms.push(newRoom);
+            saveConfig();
+            renderRoomsEditorList();
+        }
+
+        function removeRoom(roomId) {
+            if (appConfig.rooms.length <= 1) {
+                alert('É necessário manter pelo menos 1 sala cadastrada.');
+                return;
+            }
+            appConfig.rooms = appConfig.rooms.filter(r => r.id !== roomId);
+            if (appConfig.roomId === roomId) {
+                appConfig.roomId = appConfig.rooms[0].id;
+            }
+            saveConfig();
+            renderRoomsEditorList();
+        }
+
+        function saveAudioSettings() {
+            appConfig.speechRate = parseFloat(document.getElementById('speech-rate').value);
+            appConfig.chimeType = document.getElementById('chime-type-select').value;
+            saveConfig();
+        }
+
+        function testCurrentChime() {
+            playChimeSound(() => {});
+        }
+
+        function testCurrentVoice() {
+            const testCall = {
+                patientName: 'Maria Silva',
+                roomName: 'Consultório 01',
+                doctorName: 'Dr. Jonathan Santos - Clínica Geral',
+                isPreferential: false,
+                speechRate: appConfig.speechRate
+            };
+            playChimeSound(() => {
+                speakPatientCall(testCall, () => {});
+            });
+        }
     </script>
 </body>
 </html>
