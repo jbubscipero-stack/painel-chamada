@@ -567,7 +567,6 @@
 
         function autoFillFirebaseFields(text) {
             try {
-                // Tenta extrair valores usando regex caso venha no formato js/json
                 const apiKey = (text.match(/apiKey["']?\s*:\s*["']([^"']+)["']/i) || [])[1];
                 const authDomain = (text.match(/authDomain["']?\s*:\s*["']([^"']+)["']/i) || [])[1];
                 const projectId = (text.match(/projectId["']?\s*:\s*["']([^"']+)["']/i) || [])[1];
@@ -597,12 +596,11 @@
             };
 
             if (!config.apiKey || !config.projectId) {
-                alert('Preencha pelo menos a apiKey e o projectId para conectar.');
+                console.warn('Preencha pelo menos a apiKey e o projectId para conectar.');
                 return;
             }
 
             localStorage.setItem('chamamed_firebase_config', JSON.stringify(config));
-            alert('Configuração salva com sucesso! O sistema vai conectar agora.');
             initFirebaseSync();
         }
 
@@ -615,7 +613,6 @@
             document.getElementById('fb-sender-id').value = '';
             document.getElementById('fb-app-id').value = '';
             document.getElementById('firebase-raw-json').value = '';
-            alert('Configuração limpa.');
             initFirebaseSync();
         }
 
@@ -663,8 +660,10 @@
         function initClock() {
             function update() {
                 const now = new Date();
-                document.getElementById('clock-time').textContent = now.toLocaleTimeString('pt-BR');
-                document.getElementById('clock-date').textContent = now.toLocaleDateString('pt-BR');
+                const timeEl = document.getElementById('clock-time');
+                const dateEl = document.getElementById('clock-date');
+                if (timeEl) timeEl.textContent = now.toLocaleTimeString('pt-BR');
+                if (dateEl) dateEl.textContent = now.toLocaleDateString('pt-BR');
             }
             update();
             setInterval(update, 1000);
@@ -677,15 +676,15 @@
             const panelTv = document.getElementById('view-tv-panel');
 
             if (view === 'doctor') {
-                btnDoc.className = 'px-4 py-2 rounded-xl font-semibold text-xs sm:text-sm transition-all duration-200 bg-sky-600 text-white shadow-md flex items-center space-x-2';
-                btnTv.className = 'px-4 py-2 rounded-xl font-semibold text-xs sm:text-sm transition-all duration-200 text-slate-400 hover:text-white flex items-center space-x-2';
-                panelDoc.classList.remove('hidden');
-                panelTv.classList.add('hidden');
+                if (btnDoc) btnDoc.className = 'px-4 py-2 rounded-xl font-semibold text-xs sm:text-sm transition-all duration-200 bg-sky-600 text-white shadow-md flex items-center space-x-2';
+                if (btnTv) btnTv.className = 'px-4 py-2 rounded-xl font-semibold text-xs sm:text-sm transition-all duration-200 text-slate-400 hover:text-white flex items-center space-x-2';
+                if (panelDoc) panelDoc.classList.remove('hidden');
+                if (panelTv) panelTv.classList.add('hidden');
             } else {
-                btnTv.className = 'px-4 py-2 rounded-xl font-semibold text-xs sm:text-sm transition-all duration-200 bg-sky-600 text-white shadow-md flex items-center space-x-2';
-                btnDoc.className = 'px-4 py-2 rounded-xl font-semibold text-xs sm:text-sm transition-all duration-200 text-slate-400 hover:text-white flex items-center space-x-2';
-                panelTv.classList.remove('hidden');
-                panelDoc.classList.add('hidden');
+                if (btnTv) btnTv.className = 'px-4 py-2 rounded-xl font-semibold text-xs sm:text-sm transition-all duration-200 bg-sky-600 text-white shadow-md flex items-center space-x-2';
+                if (btnDoc) btnDoc.className = 'px-4 py-2 rounded-xl font-semibold text-xs sm:text-sm transition-all duration-200 text-slate-400 hover:text-white flex items-center space-x-2';
+                if (panelTv) panelTv.classList.remove('hidden');
+                if (panelDoc) panelDoc.classList.add('hidden');
             }
         }
 
@@ -740,7 +739,8 @@
             const selectedRoomObj = appConfig.rooms.find(r => r.id === appConfig.roomId);
             
             if (selectedRoomObj) {
-                document.getElementById('doc-name-input').value = selectedRoomObj.doctor || '';
+                const docInput = document.getElementById('doc-name-input');
+                if (docInput) docInput.value = selectedRoomObj.doctor || '';
                 appConfig.doctorName = selectedRoomObj.doctor || '';
             }
             saveConfig();
@@ -748,13 +748,16 @@
         }
 
         function saveDoctorSettings() {
-            appConfig.doctorName = document.getElementById('doc-name-input').value.trim();
-            const currentRoom = appConfig.rooms.find(r => r.id === appConfig.roomId);
-            if (currentRoom) {
-                currentRoom.doctor = appConfig.doctorName;
+            const docInput = document.getElementById('doc-name-input');
+            if (docInput) {
+                appConfig.doctorName = docInput.value.trim();
+                const currentRoom = appConfig.rooms.find(r => r.id === appConfig.roomId);
+                if (currentRoom) {
+                    currentRoom.doctor = appConfig.doctorName;
+                }
+                saveConfig();
+                renderRoomSelectOptions();
             }
-            saveConfig();
-            renderRoomSelectOptions();
         }
 
         function playChimeSound(onEnded) {
@@ -817,37 +820,50 @@
             }
         }
 
-        // LOCUÇÃO COMPLETA: PACIENTE + SALA + MÉDICO/ESPECIALIDADE
         function speakPatientCall(call, onComplete) {
             if (!('speechSynthesis' in window)) {
                 setTimeout(onComplete, 2500);
                 return;
             }
 
-            window.speechSynthesis.cancel();
+            try {
+                window.speechSynthesis.cancel();
 
-            let destination = call.roomName;
-            if (call.doctorName) {
-                const cleanDoctor = call.doctorName.replace(/[-/]/g, ', ');
-                destination += `, ${cleanDoctor}`;
+                let destination = call.roomName;
+                if (call.doctorName) {
+                    const cleanDoctor = call.doctorName.replace(/[-/]/g, ', ');
+                    destination += `, ${cleanDoctor}`;
+                }
+
+                let phrase = `Atenção: Paciente, ${call.patientName}. Dirigir-se à ${destination}.`;
+                if (call.isPreferential) {
+                    phrase = `Atenção: Paciente preferencial, ${call.patientName}. Dirigir-se à ${destination}.`;
+                }
+
+                const utterance = new SpeechSynthesisUtterance(phrase);
+                utterance.lang = 'pt-BR';
+                utterance.rate = parseFloat(call.speechRate || appConfig.speechRate || 0.95);
+
+                utterance.onend = function() {
+                    if (typeof onComplete === 'function') onComplete();
+                };
+                utterance.onerror = function() {
+                    if (typeof onComplete === 'function') onComplete();
+                };
+
+                window.speechSynthesis.speak(utterance);
+            } catch(e) {
+                console.error("Erro na síntese de voz:", e);
+                if (typeof onComplete === 'function') onComplete();
             }
+        }
 
-            let phrase = `Atenção: Paciente, ${call.patientName}. Dirigir-se à ${destination}.`;
-            if (call.isPreferential) {
-                phrase = `Atenção: Paciente preferencial, ${call.patientName}. Dirigir-se à ${destination}.`;
-            }
-
-            const utterance = new SpeechSynthesisUtterance(phrase);
-            utterance.lang = 'pt-BR';
-            utterance.rate = parseFloat(call.speechRate || appConfig.speechRate || 0.95);
-
-            utterance.onend = onComplete;
         function triggerCall(isRecall = false, patientOverride = null) {
             const inputField = document.getElementById('patient-name-input');
             const name = patientOverride || (inputField ? inputField.value.trim() : '');
 
             if (!name && !isRecall) {
-                alert('Por favor, informe o nome do paciente para efetuar a chamada.');
+                console.warn('Informe o nome do paciente para efetuar a chamada.');
                 if (inputField) inputField.focus();
                 return;
             }
@@ -905,7 +921,7 @@
 
         function triggerRecall() {
             if (!currentCall) {
-                alert('Nenhuma chamada anterior foi efetuada para rechamar.');
+                console.warn('Nenhuma chamada anterior foi efetuada para rechamar.');
                 return;
             }
             triggerCall(true, currentCall.patientName);
@@ -946,57 +962,59 @@
                 badgeEl.className = 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-xs sm:text-sm px-4 py-1.5 rounded-full font-extrabold uppercase tracking-widest';
             }
 
-            cardEl.classList.add('blink-call');
-            setTimeout(() => {
-                cardEl.classList.remove('blink-call');
-            }, 5000);
+            if (cardEl) {
+                cardEl.classList.add('blink-call');
+                setTimeout(() => {
+                    cardEl.classList.remove('blink-call');
+                }, 5000);
+            }
         }
 
         function updateHistoryUI() {
             const docList = document.getElementById('doc-history-list');
-            if (!docList) return;
+            if (docList) {
+                const roomCalls = callHistory.filter(c => c.roomId === appConfig.roomId);
 
-            const roomCalls = callHistory.filter(c => c.roomId === appConfig.roomId);
-
-            if (roomCalls.length === 0) {
-                docList.innerHTML = `<div class="text-center text-slate-500 py-10 text-xs">Nenhum paciente chamado nesta sala ainda.</div>`;
-            } else {
-                docList.innerHTML = roomCalls.map(c => `
-                    <div onclick="triggerCall(true, '${c.patientName}')" class="bg-slate-900/90 border border-slate-800 hover:border-sky-500/50 p-3 rounded-2xl flex items-center justify-between cursor-pointer transition">
-                        <div class="flex items-center space-x-3">
-                            <div class="p-2 ${c.isPreferential ? 'bg-amber-500/10 text-amber-400' : 'bg-sky-500/10 text-sky-400'} rounded-xl text-xs font-bold">
-                                <i class="fa-solid ${c.isPreferential ? 'fa-wheelchair' : 'fa-user'}"></i>
+                if (roomCalls.length === 0) {
+                    docList.innerHTML = `<div class="text-center text-slate-500 py-10 text-xs">Nenhum paciente chamado nesta sala ainda.</div>`;
+                } else {
+                    docList.innerHTML = roomCalls.map(c => `
+                        <div onclick="triggerCall(true, '${c.patientName.replace(/'/g, "\\'")}')" class="bg-slate-900/90 border border-slate-800 hover:border-sky-500/50 p-3 rounded-2xl flex items-center justify-between cursor-pointer transition">
+                            <div class="flex items-center space-x-3">
+                                <div class="p-2 ${c.isPreferential ? 'bg-amber-500/10 text-amber-400' : 'bg-sky-500/10 text-sky-400'} rounded-xl text-xs font-bold">
+                                    <i class="fa-solid ${c.isPreferential ? 'fa-wheelchair' : 'fa-user'}"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-xs text-white">${c.patientName}</h4>
+                                    <span class="text-[10px] text-slate-400">${c.time} ${c.isPreferential ? '• Preferencial' : ''}</span>
+                                </div>
                             </div>
-                            <div>
-                                <h4 class="font-bold text-xs text-white">${c.patientName}</h4>
-                                <span class="text-[10px] text-slate-400">${c.time} ${c.isPreferential ? '• Preferencial' : ''}</span>
-                            </div>
+                            <span class="text-[10px] text-sky-400 font-bold bg-sky-500/10 px-2 py-1 rounded-lg">Rechamar</span>
                         </div>
-                        <span class="text-[10px] text-sky-400 font-bold bg-sky-500/10 px-2 py-1 rounded-lg">Rechamar</span>
-                    </div>
-                `).join('');
+                    `).join('');
+                }
             }
 
             const tvGrid = document.getElementById('tv-history-grid');
-            if (!tvGrid) return;
-
-            if (callHistory.length === 0) {
-                tvGrid.innerHTML = `
-                    <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 text-center text-slate-500 text-xs">Aguardando...</div>
-                    <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 text-center text-slate-500 text-xs">Aguardando...</div>
-                    <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 text-center text-slate-500 text-xs">Aguardando...</div>
-                    <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 text-center text-slate-500 text-xs">Aguardando...</div>
-                `;
-            } else {
-                tvGrid.innerHTML = callHistory.slice(0, 4).map(c => `
-                    <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 flex flex-col justify-between">
-                        <div>
-                            <span class="text-[10px] uppercase font-extrabold ${c.isPreferential ? 'text-amber-400' : 'text-slate-400'}">${c.time} - ${c.roomName}</span>
-                            <h4 class="font-extrabold text-white text-sm truncate mt-0.5">${c.patientName}</h4>
+            if (tvGrid) {
+                if (callHistory.length === 0) {
+                    tvGrid.innerHTML = `
+                        <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 text-center text-slate-500 text-xs">Aguardando...</div>
+                        <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 text-center text-slate-500 text-xs">Aguardando...</div>
+                        <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 text-center text-slate-500 text-xs">Aguardando...</div>
+                        <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 text-center text-slate-500 text-xs">Aguardando...</div>
+                    `;
+                } else {
+                    tvGrid.innerHTML = callHistory.slice(0, 4).map(c => `
+                        <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 flex flex-col justify-between">
+                            <div>
+                                <span class="text-[10px] uppercase font-extrabold ${c.isPreferential ? 'text-amber-400' : 'text-slate-400'}">${c.time} - ${c.roomName}</span>
+                                <h4 class="font-extrabold text-white text-sm truncate mt-0.5">${c.patientName}</h4>
+                            </div>
+                            <p class="text-[11px] text-sky-300 font-medium truncate mt-2 border-t border-slate-800 pt-1.5">${c.doctorName || 'Atendimento'}</p>
                         </div>
-                        <p class="text-[11px] text-sky-300 font-medium truncate mt-2 border-t border-slate-800 pt-1.5">${c.doctorName || 'Atendimento'}</p>
-                    </div>
-                `).join('');
+                    `).join('');
+                }
             }
         }
 
@@ -1007,8 +1025,10 @@
 
         function openSettingsModal() {
             renderRoomsEditorList();
-            document.getElementById('speech-rate').value = appConfig.speechRate;
-            document.getElementById('chime-type-select').value = appConfig.chimeType;
+            const rateInput = document.getElementById('speech-rate');
+            const chimeSelect = document.getElementById('chime-type-select');
+            if (rateInput) rateInput.value = appConfig.speechRate;
+            if (chimeSelect) chimeSelect.value = appConfig.chimeType;
             
             const savedCustom = localStorage.getItem('chamamed_firebase_config');
             if (savedCustom) {
@@ -1023,11 +1043,13 @@
                 } catch(e) {}
             }
 
-            document.getElementById('settings-modal').classList.remove('hidden');
+            const modal = document.getElementById('settings-modal');
+            if (modal) modal.classList.remove('hidden');
         }
 
         function closeSettingsModal() {
-            document.getElementById('settings-modal').classList.add('hidden');
+            const modal = document.getElementById('settings-modal');
+            if (modal) modal.classList.add('hidden');
             renderRoomSelectOptions();
             onRoomSelectChange();
         }
@@ -1072,7 +1094,7 @@
 
         function removeRoom(roomId) {
             if (appConfig.rooms.length <= 1) {
-                alert('É necessário manter pelo menos 1 sala cadastrada.');
+                console.warn('É necessário manter pelo menos 1 sala cadastrada.');
                 return;
             }
             appConfig.rooms = appConfig.rooms.filter(r => r.id !== roomId);
@@ -1084,8 +1106,10 @@
         }
 
         function saveAudioSettings() {
-            appConfig.speechRate = parseFloat(document.getElementById('speech-rate').value);
-            appConfig.chimeType = document.getElementById('chime-type-select').value;
+            const rateInput = document.getElementById('speech-rate');
+            const chimeSelect = document.getElementById('chime-type-select');
+            if (rateInput) appConfig.speechRate = parseFloat(rateInput.value);
+            if (chimeSelect) appConfig.chimeType = chimeSelect.value;
             saveConfig();
         }
 
