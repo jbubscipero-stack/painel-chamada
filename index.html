@@ -104,7 +104,7 @@
                     <span class="text-[10px] uppercase font-extrabold text-slate-400 tracking-wider">Status do Sistema</span>
                     <h3 class="text-xs sm:text-sm font-bold text-emerald-400 flex items-center space-x-2" id="sync-status-text">
                         <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                        <span>Sincronização Cloud Ativa</span>
+                        <span>Sincronização Cloud Ativa (Nativa)</span>
                     </h3>
                 </div>
             </div>
@@ -239,7 +239,7 @@
 
                 <div class="text-center py-6 sm:py-10 space-y-4">
                     <span class="text-xs sm:text-sm font-black uppercase tracking-[0.3em] text-slate-400">PACIENTE CHAMADO</span>
-                    <h2 id="tv-patient-name" class="text-4xl sm:text-6xl md:text-7xl font-black text-white tracking-tight leading-tight drop-shadow-md">
+                    <h2 id="tv-patient-name" class="text-3xl sm:text-5xl md:text-6xl font-black text-white tracking-tight leading-tight drop-shadow-md break-words max-w-full px-2">
                         Aguardando Chamada...
                     </h2>
                 </div>
@@ -247,13 +247,13 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6 pt-6 border-t border-slate-800">
                     <div class="bg-slate-900/90 p-5 rounded-2xl border border-slate-800 text-center">
                         <span class="text-[10px] uppercase font-black text-slate-400 tracking-wider">LOCAL / SALA</span>
-                        <p id="tv-room-name" class="text-2xl sm:text-3xl font-black text-sky-400 mt-1">
+                        <p id="tv-room-name" class="text-xl sm:text-2xl font-black text-sky-400 mt-1 break-words">
                             --
                         </p>
                     </div>
                     <div class="bg-slate-900/90 p-5 rounded-2xl border border-slate-800 text-center">
                         <span class="text-[10px] uppercase font-black text-slate-400 tracking-wider">MÉDICO / PROCEDIMENTO</span>
-                        <p id="tv-doctor-name" class="text-xl sm:text-2xl font-black text-slate-100 mt-1">
+                        <p id="tv-doctor-name" class="text-lg sm:text-xl font-black text-slate-100 mt-1 break-words">
                             --
                         </p>
                     </div>
@@ -339,59 +339,13 @@
                     </div>
                 </div>
 
-                <!-- CONFIGURAÇÃO DO FIREBASE (CAMPOS SEPARADOS) -->
-                <div class="border-t border-slate-800 pt-5 space-y-4">
-                    <div class="flex items-center justify-between">
-                        <h4 class="font-bold text-white text-sm flex items-center space-x-2">
-                            <i class="fa-solid fa-fire text-amber-500"></i>
-                            <span>Sincronização Cloud (Firebase)</span>
-                        </h4>
-                        <span id="firebase-connection-badge" class="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-slate-800 text-slate-400">Verificando...</span>
-                    </div>
-                    <p class="text-xs text-slate-400">Preencha com os dados do seu projeto no Firebase Console (Project Settings > General), ou cole o bloco JSON inteiro no primeiro campo para preencher automático.</p>
-                    
-                    <!-- Atalho para colar tudo -->
-                    <div>
-                        <label class="block text-xs font-bold text-slate-400 mb-1">Colar Bloco Firebase Inteiro (Opcional)</label>
-                        <textarea id="firebase-raw-json" rows="2" placeholder='Cole aqui o objeto JSON do Firebase para preencher os campos abaixo sozinhos...' onchange="autoFillFirebaseFields(this.value)" class="w-full bg-slate-900 border border-slate-700 text-slate-300 font-mono text-[11px] rounded-xl p-2.5 focus:outline-none focus:border-sky-500"></textarea>
-                    </div>
-
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <div>
-                            <label class="block text-xs font-bold text-slate-400 mb-1">apiKey</label>
-                            <input type="text" id="fb-api-key" placeholder="AIzaSy..." class="w-full bg-slate-900 border border-slate-700 text-white font-mono text-xs rounded-xl p-2.5 focus:outline-none focus:border-sky-500">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-400 mb-1">authDomain</label>
-                            <input type="text" id="fb-auth-domain" placeholder="seu-app.firebaseapp.com" class="w-full bg-slate-900 border border-slate-700 text-white font-mono text-xs rounded-xl p-2.5 focus:outline-none focus:border-sky-500">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-400 mb-1">projectId</label>
-                            <input type="text" id="fb-project-id" placeholder="seu-app-id" class="w-full bg-slate-900 border border-slate-700 text-white font-mono text-xs rounded-xl p-2.5 focus:outline-none focus:border-sky-500">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-400 mb-1">storageBucket</label>
-                            <input type="text" id="fb-storage-bucket" placeholder="seu-app.appspot.com" class="w-full bg-slate-900 border border-slate-700 text-white font-mono text-xs rounded-xl p-2.5 focus:outline-none focus:border-sky-500">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-400 mb-1">messagingSenderId</label>
-                            <input type="text" id="fb-sender-id" placeholder="123456789" class="w-full bg-slate-900 border border-slate-700 text-white font-mono text-xs rounded-xl p-2.5 focus:outline-none focus:border-sky-500">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-400 mb-1">appId</label>
-                            <input type="text" id="fb-app-id" placeholder="1:123456:web:abc" class="w-full bg-slate-900 border border-slate-700 text-white font-mono text-xs rounded-xl p-2.5 focus:outline-none focus:border-sky-500">
-                        </div>
-                    </div>
-
-                    <div class="flex items-center justify-between pt-2">
-                        <button onclick="clearCustomFirebaseConfig()" class="text-xs text-slate-500 hover:text-red-400 font-semibold transition">
-                            Limpar / Desconectar Firebase
-                        </button>
-                        <button onclick="saveCustomFirebaseConfigFields()" class="bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs px-4 py-2.5 rounded-xl transition shadow flex items-center space-x-1.5">
-                            <i class="fa-solid fa-plug"></i>
-                            <span>Salvar e Conectar Firebase</span>
-                        </button>
-                    </div>
+                <!-- STATUS DE NUVEM NATIVA -->
+                <div class="border-t border-slate-800 pt-5 space-y-2">
+                    <h4 class="font-bold text-white text-sm flex items-center space-x-2">
+                        <i class="fa-solid fa-shield-halved text-emerald-400"></i>
+                        <span>Sincronização Cloud Ativa (Nativa na Raiz)</span>
+                    </h4>
+                    <p class="text-xs text-slate-400">As chaves do projeto estão configuradas nativamente no código. Qualquer celular, tablet ou TV que abrir este link se conectará automaticamente na mesma nuvem.</p>
                 </div>
 
             </div>
@@ -409,10 +363,21 @@
         <p>ChamaMed PRO &copy; 2026 - Sistema Inteligente de Gestão de Filas Hospitalares e UBS</p>
     </footer>
 
+    <!-- SCRIPT DA APLICAÇÃO -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, onSnapshot, collection } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // CREDENCIAIS NATIVAS NA RAIZ DO CÓDIGO
+        const NATIVE_FIREBASE_CONFIG = {
+            apiKey: "AIzaSyC2I6G89W8xDTbN8vBEzYbthA-L_S1tw0",
+            authDomain: "painel-chamada-a847a.firebaseapp.com",
+            projectId: "painel-chamada-a847a",
+            storageBucket: "painel-chamada-a847a.firebasestorage.app",
+            messagingSenderId: "454570892006",
+            appId: "1:454570892006:web:5f99df760a3396ae93f927"
+        };
 
         const DEFAULT_ROOMS = [
             { id: 'room-1', name: 'Consultório 01', doctor: 'Dr. Jonathan Santos - Clínica Geral' },
@@ -470,50 +435,17 @@
                         handleIncomingCall(event.data.call, false);
                     }
                 };
-            } catch(e) {
-                console.log("BroadcastChannel não suportado:", e);
-            }
+            } catch(e) {}
         }
 
         async function initFirebaseSync() {
-            let activeFirebaseConfig = null;
-            let isCustomConfig = false;
-
-            const savedCustom = localStorage.getItem('chamamed_firebase_config');
-            if (savedCustom) {
-                try {
-                    activeFirebaseConfig = JSON.parse(savedCustom);
-                    isCustomConfig = true;
-                } catch(e) {
-                    console.error("Erro ao analisar configuração salva:", e);
-                }
-            }
-
-            if (!activeFirebaseConfig && typeof __firebase_config !== 'undefined' && __firebase_config) {
-                try {
-                    activeFirebaseConfig = JSON.parse(__firebase_config);
-                } catch(e) {
-                    console.error("Erro ao ler __firebase_config:", e);
-                }
-            }
-
-            const badge = document.getElementById('firebase-connection-badge');
-
-            if (!activeFirebaseConfig || !activeFirebaseConfig.apiKey || !activeFirebaseConfig.projectId) {
-                updateSyncStatusUI('Modo Local Ativo (Configure o Firebase se desejar nuvem)', false);
-                if (badge) {
-                    badge.textContent = 'Modo Local';
-                    badge.className = 'text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-slate-800 text-slate-400';
-                }
-                return;
-            }
-
+            const badge = document.getElementById('sync-status-text');
             try {
-                const app = initializeApp(activeFirebaseConfig, isCustomConfig ? 'customApp' + Date.now() : '[DEFAULT]');
+                const app = initializeApp(NATIVE_FIREBASE_CONFIG);
                 auth = getAuth(app);
                 db = getFirestore(app);
 
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token && !isCustomConfig) {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
                     const cred = await signInWithCustomToken(auth, __initial_auth_token);
                     currentUser = cred.user;
                 } else {
@@ -521,11 +453,8 @@
                     currentUser = cred.user;
                 }
 
-                updateSyncStatusUI('Sincronização Cloud Ativa', true);
-
                 if (badge) {
-                    badge.textContent = 'Conectado';
-                    badge.className = 'text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30';
+                    badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span><span>Sincronização Cloud Ativa (Nativa)</span>`;
                 }
 
                 const callsCollection = collection(db, 'artifacts', appId, 'public', 'data', 'calls');
@@ -548,81 +477,13 @@
                     updateHistoryUI();
                 }, (error) => {
                     console.error("Erro no listener do Firestore:", error);
-                    updateSyncStatusUI('Modo Local (Erro na Nuvem)', false);
-                    if (badge) {
-                        badge.textContent = 'Erro Conexão';
-                        badge.className = 'text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/30';
-                    }
                 });
 
             } catch (err) {
-                console.error("Erro ao inicializar Firebase:", err);
-                updateSyncStatusUI('Modo Local (Falha Firebase)', false);
+                console.error("Erro ao inicializar Firebase nativo:", err);
                 if (badge) {
-                    badge.textContent = 'Erro Config';
-                    badge.className = 'text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/30';
+                    badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-amber-400"></span><span>Modo Sincronização Local</span>`;
                 }
-            }
-        }
-
-        function autoFillFirebaseFields(text) {
-            try {
-                const apiKey = (text.match(/apiKey["']?\s*:\s*["']([^"']+)["']/i) || [])[1];
-                const authDomain = (text.match(/authDomain["']?\s*:\s*["']([^"']+)["']/i) || [])[1];
-                const projectId = (text.match(/projectId["']?\s*:\s*["']([^"']+)["']/i) || [])[1];
-                const storageBucket = (text.match(/storageBucket["']?\s*:\s*["']([^"']+)["']/i) || [])[1];
-                const messagingSenderId = (text.match(/messagingSenderId["']?\s*:\s*["']([^"']+)["']/i) || [])[1];
-                const appIdVal = (text.match(/appId["']?\s*:\s*["']([^"']+)["']/i) || [])[1];
-
-                if (apiKey) document.getElementById('fb-api-key').value = apiKey;
-                if (authDomain) document.getElementById('fb-auth-domain').value = authDomain;
-                if (projectId) document.getElementById('fb-project-id').value = projectId;
-                if (storageBucket) document.getElementById('fb-storage-bucket').value = storageBucket;
-                if (messagingSenderId) document.getElementById('fb-sender-id').value = messagingSenderId;
-                if (appIdVal) document.getElementById('fb-app-id').value = appIdVal;
-            } catch(e) {
-                console.log("Erro no autocompletar:", e);
-            }
-        }
-
-        function saveCustomFirebaseConfigFields() {
-            const config = {
-                apiKey: document.getElementById('fb-api-key').value.trim(),
-                authDomain: document.getElementById('fb-auth-domain').value.trim(),
-                projectId: document.getElementById('fb-project-id').value.trim(),
-                storageBucket: document.getElementById('fb-storage-bucket').value.trim(),
-                messagingSenderId: document.getElementById('fb-sender-id').value.trim(),
-                appId: document.getElementById('fb-app-id').value.trim()
-            };
-
-            if (!config.apiKey || !config.projectId) {
-                console.warn('Preencha pelo menos a apiKey e o projectId para conectar.');
-                return;
-            }
-
-            localStorage.setItem('chamamed_firebase_config', JSON.stringify(config));
-            initFirebaseSync();
-        }
-
-        function clearCustomFirebaseConfig() {
-            localStorage.removeItem('chamamed_firebase_config');
-            document.getElementById('fb-api-key').value = '';
-            document.getElementById('fb-auth-domain').value = '';
-            document.getElementById('fb-project-id').value = '';
-            document.getElementById('fb-storage-bucket').value = '';
-            document.getElementById('fb-sender-id').value = '';
-            document.getElementById('fb-app-id').value = '';
-            document.getElementById('firebase-raw-json').value = '';
-            initFirebaseSync();
-        }
-
-        function updateSyncStatusUI(text, isOnline) {
-            const statusText = document.getElementById('sync-status-text');
-            if (statusText) {
-                statusText.innerHTML = `
-                    <span class="w-2 h-2 rounded-full ${isOnline ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'}"></span>
-                    <span>${text}</span>
-                `;
             }
         }
 
@@ -647,9 +508,7 @@
                     if (parsed.roomId) appConfig.roomId = parsed.roomId;
                     if (parsed.speechRate) appConfig.speechRate = parsed.speechRate;
                     if (parsed.chimeType) appConfig.chimeType = parsed.chimeType;
-                } catch(e) {
-                    console.error("Erro ao carregar configurações", e);
-                }
+                } catch(e) {}
             }
         }
 
@@ -714,9 +573,7 @@
                         </span>
                     `;
                 }
-            } catch(e) {
-                console.error("Erro ao desbloquear áudio:", e);
-            }
+            } catch(e) {}
         }
 
         function renderRoomSelectOptions() {
@@ -815,7 +672,6 @@
                     setTimeout(onEnded, 500);
                 }
             } catch(e) {
-                console.log("Audio API não permitida ou erro no som:", e);
                 setTimeout(onEnded, 500);
             }
         }
@@ -853,7 +709,6 @@
 
                 window.speechSynthesis.speak(utterance);
             } catch(e) {
-                console.error("Erro na síntese de voz:", e);
                 if (typeof onComplete === 'function') onComplete();
             }
         }
@@ -863,7 +718,6 @@
             const name = patientOverride || (inputField ? inputField.value.trim() : '');
 
             if (!name && !isRecall) {
-                console.warn('Informe o nome do paciente para efetuar a chamada.');
                 if (inputField) inputField.focus();
                 return;
             }
@@ -894,10 +748,8 @@
             if (db && currentUser) {
                 try {
                     const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'calls', callDocId);
-                    setDoc(docRef, callData).catch(e => console.error("Erro ao gravar no Firestore:", e));
-                } catch(e) {
-                    console.error("Erro ao chamar Firestore:", e);
-                }
+                    setDoc(docRef, callData).catch(e => {});
+                } catch(e) {}
             }
 
             if (broadcastChannel) {
@@ -920,10 +772,7 @@
         }
 
         function triggerRecall() {
-            if (!currentCall) {
-                console.warn('Nenhuma chamada anterior foi efetuada para rechamar.');
-                return;
-            }
+            if (!currentCall) return;
             triggerCall(true, currentCall.patientName);
         }
 
@@ -1030,19 +879,6 @@
             if (rateInput) rateInput.value = appConfig.speechRate;
             if (chimeSelect) chimeSelect.value = appConfig.chimeType;
             
-            const savedCustom = localStorage.getItem('chamamed_firebase_config');
-            if (savedCustom) {
-                try {
-                    const parsed = JSON.parse(savedCustom);
-                    document.getElementById('fb-api-key').value = parsed.apiKey || '';
-                    document.getElementById('fb-auth-domain').value = parsed.authDomain || '';
-                    document.getElementById('fb-project-id').value = parsed.projectId || '';
-                    document.getElementById('fb-storage-bucket').value = parsed.storageBucket || '';
-                    document.getElementById('fb-sender-id').value = parsed.messagingSenderId || '';
-                    document.getElementById('fb-app-id').value = parsed.appId || '';
-                } catch(e) {}
-            }
-
             const modal = document.getElementById('settings-modal');
             if (modal) modal.classList.remove('hidden');
         }
@@ -1093,10 +929,7 @@
         }
 
         function removeRoom(roomId) {
-            if (appConfig.rooms.length <= 1) {
-                console.warn('É necessário manter pelo menos 1 sala cadastrada.');
-                return;
-            }
+            if (appConfig.rooms.length <= 1) return;
             appConfig.rooms = appConfig.rooms.filter(r => r.id !== roomId);
             if (appConfig.roomId === roomId) {
                 appConfig.roomId = appConfig.rooms[0].id;
@@ -1145,9 +978,6 @@
         window.testCurrentChime = testCurrentChime;
         window.testCurrentVoice = testCurrentVoice;
         window.enableTVAudio = enableTVAudio;
-        window.autoFillFirebaseFields = autoFillFirebaseFields;
-        window.saveCustomFirebaseConfigFields = saveCustomFirebaseConfigFields;
-        window.clearCustomFirebaseConfig = clearCustomFirebaseConfig;
     </script>
 </body>
 </html>
