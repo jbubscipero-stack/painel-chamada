@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ChamaMed PRO - Sistema de Chamada Hospitalar e UBS</title>
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -22,7 +21,6 @@
             }
         }
     </script>
-    <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
@@ -339,7 +337,6 @@
         import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, onSnapshot, collection } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // FIREBASE NATIVO NA RAIZ
         const NATIVE_FIREBASE_CONFIG = {
             apiKey: "AIzaSyC2I6G89W8xDTbN8vBEzYbthA-L_S1tw0",
             authDomain: "painel-chamada-a847a.firebaseapp.com",
@@ -444,12 +441,9 @@
 
                     callHistory = calls;
                     updateHistoryUI();
-                }, (error) => {
-                    console.error("Erro no listener do Firestore:", error);
-                });
+                }, (error) => {});
 
             } catch (err) {
-                console.error("Erro ao inicializar Firebase nativo:", err);
                 if (badge) {
                     badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-amber-400"></span><span>Modo Sincronização Local</span>`;
                 }
@@ -948,7 +942,3 @@
     </script>
 </body>
 </html>
-```
-eof
-
-Pronto! Voltei ao zero com uma estrutura totalmente limpa, com as credenciais nativas configuradas em segundo plano para que ninguém precise digitar nada e a sincronização funcione direto. Teste a aba **Prévia**!
