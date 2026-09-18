@@ -24,7 +24,6 @@
     </script>
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Custom CSS Animations -->
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
         body {
@@ -52,7 +51,6 @@
     <header class="bg-darkcard border-b border-darkcardborder p-4 sticky top-0 z-40 shadow-lg">
         <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
             
-            <!-- LOGO DA APLICAÇÃO -->
             <div class="flex items-center space-x-3">
                 <div class="p-2.5 bg-gradient-to-tr from-sky-600 to-indigo-600 text-white rounded-2xl shadow-lg shadow-sky-500/20">
                     <i class="fa-solid fa-hospital-user text-2xl"></i>
@@ -66,7 +64,6 @@
                 </div>
             </div>
 
-            <!-- NAVEGAÇÃO DE PAINÉIS -->
             <div class="flex items-center bg-slate-900/80 p-1.5 rounded-2xl border border-darkcardborder shadow-inner">
                 <button id="btn-view-doctor" onclick="switchView('doctor')" class="px-4 py-2 rounded-xl font-semibold text-xs sm:text-sm transition-all duration-200 bg-sky-600 text-white shadow-md flex items-center space-x-2">
                     <i class="fa-solid fa-user-doctor"></i>
@@ -78,7 +75,6 @@
                 </button>
             </div>
 
-            <!-- CONTROLES & RELÓGIO -->
             <div class="flex items-center space-x-4">
                 <div class="hidden sm:block text-right">
                     <div class="text-base font-extrabold text-slate-100 tracking-wider" id="clock-time">00:00:00</div>
@@ -94,17 +90,16 @@
 
     <main class="max-w-7xl mx-auto w-full p-4 sm:p-6 flex-grow">
 
-        <!-- STATUS DA SINCRONIZAÇÃO AUTOMÁTICA -->
         <div class="mb-6 bg-darkcard border border-darkcardborder rounded-2xl p-4 flex items-center justify-between shadow-sm flex-wrap gap-3">
             <div class="flex items-center space-x-3">
                 <div class="p-2.5 bg-emerald-500/10 text-emerald-400 rounded-xl border border-emerald-500/20 text-lg">
                     <i class="fa-solid fa-wifi"></i>
                 </div>
                 <div>
-                    <span class="text-[10px] uppercase font-extrabold text-slate-400 tracking-wider">Status do Sistema</span>
+                    <span class="text-[10px] uppercase font-extrabold text-slate-400 tracking-wider">Status da Sincronização</span>
                     <h3 class="text-xs sm:text-sm font-bold text-emerald-400 flex items-center space-x-2" id="sync-status-text">
                         <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                        <span>Sincronização Cloud Ativa (Nativa)</span>
+                        <span>Sincronizado na Nuvem (Nativo)</span>
                     </h3>
                 </div>
             </div>
@@ -114,10 +109,8 @@
         <!-- VIEW 1: PAINEL DO PROFISSIONAL -->
         <div id="view-doctor-panel" class="grid grid-cols-1 lg:grid-cols-12 gap-6">
             
-            <!-- FORMULÁRIO DE CHAMADA DO PACIENTE -->
             <div class="lg:col-span-7 space-y-6">
                 
-                <!-- SELEÇÃO DE SALA E MÉDICO -->
                 <div class="bg-darkcard border border-darkcardborder rounded-3xl p-6 shadow-xl space-y-4">
                     <div class="flex items-center justify-between border-b border-slate-800 pb-3">
                         <h3 class="font-bold text-white text-base flex items-center space-x-2">
@@ -131,7 +124,6 @@
                         <div>
                             <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Sala / Consultório</label>
                             <select id="doc-room-select" onchange="onRoomSelectChange()" class="w-full bg-slate-900 border border-slate-700 text-white font-bold text-sm rounded-2xl p-3 focus:outline-none focus:border-sky-500 transition">
-                                <!-- Opções inseridas via JS -->
                             </select>
                         </div>
                         <div>
@@ -141,7 +133,6 @@
                     </div>
                 </div>
 
-                <!-- CAMPO NOME DO PACIENTE E BOTOES -->
                 <div class="bg-darkcard border border-darkcardborder rounded-3xl p-6 shadow-xl space-y-5">
                     <div>
                         <label class="block text-xs font-bold uppercase tracking-wider text-sky-400 mb-2">Nome do Paciente para Chamada</label>
@@ -172,7 +163,6 @@
                         </div>
                     </div>
 
-                    <!-- BOTOES DE AÇÃO -->
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
                         <button onclick="triggerCall(false)" class="w-full py-4 px-6 bg-gradient-to-r from-sky-600 to-blue-600 hover:from-sky-500 hover:to-blue-500 text-white font-extrabold text-base rounded-2xl shadow-lg shadow-sky-600/30 active:scale-95 transition flex items-center justify-center space-x-3">
                             <i class="fa-solid fa-bullhorn text-xl"></i>
@@ -188,7 +178,6 @@
 
             </div>
 
-            <!-- HISTÓRICO DE CHAMADAS NESTA SALA -->
             <div class="lg:col-span-5">
                 <div class="bg-darkcard border border-darkcardborder rounded-3xl p-6 shadow-xl h-full flex flex-col justify-between">
                     <div>
@@ -203,7 +192,6 @@
                         </div>
 
                         <div id="doc-history-list" class="space-y-3 max-h-[420px] overflow-y-auto pr-1">
-                            <!-- Renderizado via JS -->
                         </div>
                     </div>
                 </div>
@@ -211,10 +199,9 @@
 
         </div>
 
-        <!-- VIEW 2: PAINEL TV CHAMADAS (OCULTO POR PADRÃO) -->
+        <!-- VIEW 2: PAINEL TV CHAMADAS -->
         <div id="view-tv-panel" class="hidden space-y-6">
             
-            <!-- BANNER DE DESTRAVAMENTO DE ÁUDIO PARA TV/CELULAR -->
             <div id="tv-audio-unlock-banner" class="bg-sky-600/20 border border-sky-500/40 p-4 rounded-3xl flex items-center justify-between text-sky-200 text-xs sm:text-sm font-bold">
                 <span class="flex items-center space-x-2">
                     <i class="fa-solid fa-volume-high text-sky-400 text-lg"></i>
@@ -225,7 +212,6 @@
                 </button>
             </div>
 
-            <!-- CARD PRINCIPAL DE CHAMADA DA TV -->
             <div id="tv-main-card" class="bg-darkcard border-2 border-darkcardborder rounded-[32px] p-6 sm:p-10 shadow-2xl transition-all duration-300">
                 <div class="flex items-center justify-between mb-6 border-b border-slate-800 pb-4">
                     <span id="tv-badge-status" class="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-xs sm:text-sm px-4 py-1.5 rounded-full font-extrabold uppercase tracking-widest">
@@ -260,14 +246,12 @@
                 </div>
             </div>
 
-            <!-- ÚLTIMOS PACIENTES CHAMADOS NA TV -->
             <div class="space-y-3">
                 <h3 class="text-sm font-extrabold uppercase tracking-wider text-slate-400 flex items-center space-x-2">
                     <i class="fa-solid fa-list-ol text-sky-400"></i>
                     <span>Últimas Chamadas</span>
                 </h3>
                 <div id="tv-history-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-                    <!-- Cards de histórico de TV inseridos via JS -->
                 </div>
             </div>
 
@@ -275,7 +259,6 @@
 
     </main>
 
-    <!-- MODAL DE CONFIGURAÇÕES E SALAS -->
     <div id="settings-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
         <div class="bg-darkcard border border-darkcardborder rounded-3xl max-w-2xl w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
             
@@ -291,7 +274,6 @@
 
             <div class="p-6 overflow-y-auto space-y-6 flex-grow">
                 
-                <!-- GERENCIADOR DE SALAS -->
                 <div>
                     <div class="flex items-center justify-between mb-3">
                         <div>
@@ -305,11 +287,9 @@
                     </div>
                     
                     <div id="rooms-editor-list" class="space-y-2 max-h-52 overflow-y-auto pr-1">
-                        <!-- Lista de salas em edição -->
                     </div>
                 </div>
 
-                <!-- CONFIGURAÇÕES DE ÁUDIO -->
                 <div class="border-t border-slate-800 pt-5 space-y-4">
                     <h4 class="font-bold text-white text-sm">Configuração de Áudio e Voz</h4>
                     
@@ -339,15 +319,6 @@
                     </div>
                 </div>
 
-                <!-- STATUS DE NUVEM NATIVA -->
-                <div class="border-t border-slate-800 pt-5 space-y-2">
-                    <h4 class="font-bold text-white text-sm flex items-center space-x-2">
-                        <i class="fa-solid fa-shield-halved text-emerald-400"></i>
-                        <span>Sincronização Cloud Ativa (Nativa na Raiz)</span>
-                    </h4>
-                    <p class="text-xs text-slate-400">As chaves do projeto estão configuradas nativamente no código. Qualquer celular, tablet ou TV que abrir este link se conectará automaticamente na mesma nuvem.</p>
-                </div>
-
             </div>
 
             <div class="p-4 border-t border-slate-800 bg-slate-900/50 text-right">
@@ -363,13 +334,12 @@
         <p>ChamaMed PRO &copy; 2026 - Sistema Inteligente de Gestão de Filas Hospitalares e UBS</p>
     </footer>
 
-    <!-- SCRIPT DA APLICAÇÃO -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, onSnapshot, collection } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // CREDENCIAIS NATIVAS NA RAIZ DO CÓDIGO
+        // FIREBASE NATIVO NA RAIZ
         const NATIVE_FIREBASE_CONFIG = {
             apiKey: "AIzaSyC2I6G89W8xDTbN8vBEzYbthA-L_S1tw0",
             authDomain: "painel-chamada-a847a.firebaseapp.com",
@@ -408,7 +378,6 @@
         let callHistory = [];
         let currentCall = null;
         let audioCtx = null;
-        let audioUnlocked = false;
         let lastProcessedCallId = null;
 
         let db = null;
@@ -454,7 +423,7 @@
                 }
 
                 if (badge) {
-                    badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span><span>Sincronização Cloud Ativa (Nativa)</span>`;
+                    badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span><span>Sincronizado na Nuvem (Nativo)</span>`;
                 }
 
                 const callsCollection = collection(db, 'artifacts', appId, 'public', 'data', 'calls');
@@ -492,7 +461,7 @@
             currentCall = call;
             updateTVPanelUI(call);
 
-            const isRecent = call.timestamp ? (Date.now() - call.timestamp) < 15000 : true;
+            const isRecent = call.timestamp ? (Date.now() - call.timestamp) < 25000 : true;
             if (isRecent) {
                 playCallSequence(call, call.repeats || 2);
             }
@@ -560,8 +529,6 @@
                     const testUtterance = new SpeechSynthesisUtterance('');
                     window.speechSynthesis.speak(testUtterance);
                 }
-
-                audioUnlocked = true;
 
                 const banner = document.getElementById('tv-audio-unlock-banner');
                 if (banner) {
@@ -981,3 +948,7 @@
     </script>
 </body>
 </html>
+```
+eof
+
+Pronto! Voltei ao zero com uma estrutura totalmente limpa, com as credenciais nativas configuradas em segundo plano para que ninguém precise digitar nada e a sincronização funcione direto. Teste a aba **Prévia**!
