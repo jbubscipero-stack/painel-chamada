@@ -339,6 +339,30 @@
                     </div>
                 </div>
 
+                <!-- CONFIGURAÇÃO CUSTOMIZADA DO FIREBASE PARA CELULAR/TV -->
+                <div class="border-t border-slate-800 pt-5 space-y-3">
+                    <div class="flex items-center justify-between">
+                        <h4 class="font-bold text-white text-sm flex items-center space-x-2">
+                            <i class="fa-solid fa-fire text-amber-500"></i>
+                            <span>Sincronização Cloud (Firebase)</span>
+                        </h4>
+                        <span id="firebase-connection-badge" class="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-slate-800 text-slate-400">Verificando...</span>
+                    </div>
+                    <p class="text-xs text-slate-400">Para sincronizar entre celular, computador e TV, cole abaixo o objeto de configuração (JSON) do seu projeto Firebase (Firebase Console > Project Settings > General).</p>
+                    <div>
+                        <textarea id="custom-firebase-json" rows="4" placeholder='{&#10;  "apiKey": "SUA_API_KEY",&#10;  "authDomain": "seu-app.firebaseapp.com",&#10;  "projectId": "seu-app-id",&#10;  "storageBucket": "seu-app.appspot.com",&#10;  "messagingSenderId": "123456789",&#10;  "appId": "1:123456789:web:abc123def"&#10;}' class="w-full bg-slate-900 border border-slate-700 text-slate-200 font-mono text-xs rounded-xl p-3 focus:outline-none focus:border-sky-500 transition"></textarea>
+                    </div>
+                    <div class="flex items-center justify-between pt-1">
+                        <button onclick="clearCustomFirebaseConfig()" class="text-xs text-slate-500 hover:text-red-400 font-semibold transition">
+                            Redefinir / Limpar Chave
+                        </button>
+                        <button onclick="saveCustomFirebaseConfig()" class="bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs px-4 py-2 rounded-xl transition shadow flex items-center space-x-1.5">
+                            <i class="fa-solid fa-plug"></i>
+                            <span>Conectar Firebase</span>
+                        </button>
+                    </div>
+                </div>
+
             </div>
 
             <div class="p-4 border-t border-slate-800 bg-slate-900/50 text-right">
@@ -425,19 +449,47 @@
         }
 
         async function initFirebaseSync() {
-            if (typeof __firebase_config === 'undefined') {
-                console.log("Variável __firebase_config ausente. Operando em Modo Broadcast Local.");
-                updateSyncStatusUI('Sincronizado Localmente', true);
+            let activeFirebaseConfig = null;
+            let isCustomConfig = false;
+
+            // 1. Tentar pegar a chave salva manualmente pelo usuário no localStorage
+            const savedCustom = localStorage.getItem('chamamed_firebase_config');
+            if (savedCustom) {
+                try {
+                    activeFirebaseConfig = JSON.parse(savedCustom);
+                    isCustomConfig = true;
+                } catch(e) {
+                    console.error("Erro ao analisar chave Firebase personalizada:", e);
+                }
+            }
+
+            // 2. Tentar fallback da variável injetada pelo ambiente
+            if (!activeFirebaseConfig && typeof __firebase_config !== 'undefined') {
+                try {
+                    activeFirebaseConfig = JSON.parse(__firebase_config);
+                } catch(e) {
+                    console.error("Erro ao ler __firebase_config:", e);
+                }
+            }
+
+            const badge = document.getElementById('firebase-connection-badge');
+
+            if (!activeFirebaseConfig) {
+                console.log("Firebase não configurado. Operando em Modo Local / Broadcast.");
+                updateSyncStatusUI('Modo Local (Sem Firebase Ativo)', false);
+                if (badge) {
+                    badge.textContent = 'Não Conectado';
+                    badge.className = 'text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/30';
+                }
                 return;
             }
 
             try {
-                const firebaseConfig = JSON.parse(__firebase_config);
-                const app = initializeApp(firebaseConfig);
+                const app = initializeApp(activeFirebaseConfig, isCustomConfig ? 'customApp' + Date.now() : '[DEFAULT]');
                 auth = getAuth(app);
                 db = getFirestore(app);
 
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token && !isCustomConfig) {
                     const cred = await signInWithCustomToken(auth, __initial_auth_token);
                     currentUser = cred.user;
                 } else {
@@ -445,7 +497,13 @@
                     currentUser = cred.user;
                 }
 
-                updateSyncStatusUI('Sincronização Automática Ativa', true);
+                const statusMessage = isCustomConfig ? 'Sincronizado Cloud (Firebase Próprio)' : 'Sincronização Automática Ativa';
+                updateSyncStatusUI(statusMessage, true);
+
+                if (badge) {
+                    badge.textContent = 'Conectado e Ativo';
+                    badge.className = 'text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30';
+                }
 
                 // Listener em Tempo Real Automático para Chamadas
                 const callsCollection = collection(db, 'artifacts', appId, 'public', 'data', 'calls');
@@ -469,13 +527,50 @@
                     updateHistoryUI();
                 }, (error) => {
                     console.error("Erro no listener do Firestore:", error);
-                    updateSyncStatusUI('Sincronizado Localmente', true);
+                    updateSyncStatusUI('Erro de Conexão Firebase', false);
+                    if (badge) {
+                        badge.textContent = 'Erro de Conexão';
+                        badge.className = 'text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-red-500/20 text-red-400 border border-red-500/30';
+                    }
                 });
 
             } catch (err) {
                 console.error("Erro ao inicializar Firebase:", err);
-                updateSyncStatusUI('Sincronizado Localmente', true);
+                updateSyncStatusUI('Erro de Conexão Firebase', false);
+                if (badge) {
+                    badge.textContent = 'Erro de Chave';
+                    badge.className = 'text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-red-500/20 text-red-400 border border-red-500/30';
+                }
             }
+        }
+
+        function saveCustomFirebaseConfig() {
+            const input = document.getElementById('custom-firebase-json');
+            if (!input || !input.value.trim()) {
+                alert('Cole a configuração JSON do seu projeto Firebase.');
+                return;
+            }
+
+            try {
+                const parsed = JSON.parse(input.value.trim());
+                if (!parsed.apiKey || !parsed.projectId) {
+                    alert('A configuração do Firebase precisa conter ao menos "apiKey" e "projectId".');
+                    return;
+                }
+                localStorage.setItem('chamamed_firebase_config', JSON.stringify(parsed));
+                alert('Configuração do Firebase salva com sucesso! O sistema irá reconectar agora.');
+                initFirebaseSync();
+            } catch(e) {
+                alert('JSON do Firebase inválido. Verifique o formato e tente novamente.');
+            }
+        }
+
+        function clearCustomFirebaseConfig() {
+            localStorage.removeItem('chamamed_firebase_config');
+            const input = document.getElementById('custom-firebase-json');
+            if (input) input.value = '';
+            alert('Chave redefinida! O sistema tentará se conectar à chave padrão ou operará em modo local.');
+            initFirebaseSync();
         }
 
         function updateSyncStatusUI(text, isOnline) {
@@ -883,6 +978,14 @@
             renderRoomsEditorList();
             document.getElementById('speech-rate').value = appConfig.speechRate;
             document.getElementById('chime-type-select').value = appConfig.chimeType;
+            
+            // Carregar chave salva se houver
+            const savedCustom = localStorage.getItem('chamamed_firebase_config');
+            const jsonInput = document.getElementById('custom-firebase-json');
+            if (jsonInput && savedCustom) {
+                jsonInput.value = savedCustom;
+            }
+
             document.getElementById('settings-modal').classList.remove('hidden');
         }
 
@@ -982,6 +1085,8 @@
         window.testCurrentChime = testCurrentChime;
         window.testCurrentVoice = testCurrentVoice;
         window.enableTVAudio = enableTVAudio;
+        window.saveCustomFirebaseConfig = saveCustomFirebaseConfig;
+        window.clearCustomFirebaseConfig = clearCustomFirebaseConfig;
     </script>
 </body>
 </html>
